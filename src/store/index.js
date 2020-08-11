@@ -3,7 +3,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import Api from '@/config/api'
-import Tool from './tool/index.js'
+import Tool from './tool.js'
 import { Loading } from 'element-ui'
 Vue.use(Vuex)
 
@@ -194,21 +194,6 @@ const store = new Vuex.Store({
       Api({ name, obj, suc })
     },
     /**
-     * [请求：保存]
-     */
-    A_addOrUpdatee({ state }, params) {
-      const loadingInstance = Loading.service({})
-      const name = '保存'
-      const method = 'post'
-      const obj = params.obj
-      const suc = function (res) {
-        loadingInstance.close()
-        // eslint-disable-next-line
-        dg.close()
-      }
-      Api({ name, obj, suc, method })
-    },
-    /**
      * [请求：模板数据]
      * @page 非新增页面
      */
@@ -249,6 +234,21 @@ const store = new Vuex.Store({
         state.nodeList = res.ganttTemplateDetail
       }
       Api({ name, obj, suc })
+    },
+    /**
+     * [请求：保存]
+     */
+    A_addOrUpdatee({ state }, params) {
+      const loadingInstance = Loading.service({})
+      const name = '保存'
+      const method = 'post'
+      const obj = params.obj
+      const suc = function (res) {
+        loadingInstance.close()
+        // eslint-disable-next-line
+        dg.close()
+      }
+      Api({ name, obj, suc, method })
     }
   }
 })

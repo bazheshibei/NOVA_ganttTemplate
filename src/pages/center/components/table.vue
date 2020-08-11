@@ -7,7 +7,7 @@
 
     <el-table :data="item" size="mini" border :height="tableHeight" v-for="(item, index) in tableObj" :key="'table_' + index" v-if="index === tableActive && pageType !== 'showView'">
       <!-- 行 -->
-      <el-table-column label="" width="40" fixed>
+      <el-table-column label="" width="45" fixed>
         <template slot-scope="scope">
           {{scope.$index + 1}}
         </template>

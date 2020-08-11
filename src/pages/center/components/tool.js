@@ -239,9 +239,9 @@ obj.submit = function (that) {
         inputStatus[`第${index + 1}行_系统计算公式`] = true
       }
       /* 提取：字段 */
-      const { sys_clac_formula, is_audit_follow, is_core_node, max_section_value, min_section_value, node_code, node_id, node_ierarchy, node_name, verification_remark, is_delete, node_template_detail_id } = item
+      const { sys_clac_formula, is_audit_follow, is_core_node, max_section_value, min_section_value, node_code, node_id, node_detail, node_ierarchy, node_name, verification_remark, is_delete, node_template_detail_id } = item
       const submit_type = parseInt(item.submit_type)
-      const obj = { sys_clac_formula, is_audit_follow, is_core_node, max_section_value, min_section_value, node_code, node_id, node_ierarchy, node_name, verification_remark, submit_type, is_delete }
+      const obj = { sys_clac_formula, is_audit_follow, is_core_node, max_section_value, min_section_value, node_code, node_id, node_detail, node_ierarchy, node_name, verification_remark, submit_type, is_delete }
       if (that.$store.state.pageType === 'update') {
         obj.node_template_detail_id = node_template_detail_id
       }
@@ -265,7 +265,6 @@ obj.submit = function (that) {
       problemArr.push(x + '输入错误')
     }
   }
-  // console.log(templateObj, problemArr, tableArr)
   return [templateObj, problemArr, tableArr]
 }
 
