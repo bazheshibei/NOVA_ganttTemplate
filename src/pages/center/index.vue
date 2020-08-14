@@ -32,15 +32,15 @@ export default {
     /** 计算：表格高度 **/
     this._countHeight()
 
-    /* 平台方法 */
-    // eslint-disable-next-line
-    dg.removeBtn('cancel')
-    // eslint-disable-next-line
-    dg.removeBtn('saveAndAdd')
-    // eslint-disable-next-line
-    dg.removeBtn('saveAndClose')
-    // eslint-disable-next-line
-    dg.removeBtn('saveNoClose')
+    // /* 平台方法 */
+    // // eslint-disable-next-line
+    // dg.removeBtn('cancel')
+    // // eslint-disable-next-line
+    // dg.removeBtn('saveAndAdd')
+    // // eslint-disable-next-line
+    // dg.removeBtn('saveAndClose')
+    // // eslint-disable-next-line
+    // dg.removeBtn('saveNoClose')
   },
   watch: {
     '$store.state.isCountTableHeight'() {

@@ -13,7 +13,7 @@
         </template>
       </el-table-column>
       <!-- 操作 -->
-      <el-table-column label="操作" width="80">
+      <el-table-column label="操作" width="80" fixed>
         <template slot-scope="scope">
           <el-tag class="deleteBtn" size="mini" plain
             v-if="!_arrIncludes(scope.row.node_code, arrCodeUsed) && pageType !== 'showView'" @click="deleteClick(scope.row.key)"
@@ -23,7 +23,7 @@
         </template>
       </el-table-column>
       <!-- 节点标识 -->
-      <el-table-column label="节点标识" width="200">
+      <el-table-column label="节点标识" width="200" fixed>
         <template slot-scope="scope">
           <el-checkbox-group v-if="tableObj[index][scope.row.index] && scope.row.node_ierarchy !== 2" v-model="tableObj[index][scope.row.index].badge" :disabled="pageType === 'showView'">
             <el-checkbox class="comCheckbox" label="is_core_node">核心节点</el-checkbox>
@@ -32,13 +32,13 @@
         </template>
       </el-table-column>
       <!-- 节点名称 -->
-      <el-table-column label="节点名称" width="180">
+      <el-table-column label="节点名称" width="180" fixed>
         <template slot-scope="scope">
           <span :style="scope.row.node_ierarchy === 2 ? 'color: #C0C4CC;' : ''">{{scope.row.node_name}}</span>
         </template>
       </el-table-column>
       <!-- 节点编码 -->
-      <el-table-column prop="node_code" label="节点编码" width="110"></el-table-column>
+      <el-table-column prop="node_code" label="节点编码" width="110" fixed></el-table-column>
       <!-- 节点层级 -->
       <el-table-column label="节点层级" width="80">
         <template slot-scope="scope">
