@@ -119,7 +119,7 @@ const store = new Vuex.Store({
         if (type) {
           // ganttTemplateAddOrUpdate
           // {"node_template_id":"8a8a806273ea5f870173eb07f21d000c","type":"update"}
-          // localStorage.removeItem('ganttTemplateAddOrUpdate')
+          localStorage.removeItem('ganttTemplateAddOrUpdate')
           /** 请求：模板数据 **/
           dispatch('A_getGanttTemplate', { that, node_template_id, type })
         } else {
