@@ -2,28 +2,30 @@
 <!-- 模块：表格 -->
 
 <template>
-  <div class="comTableBox" ref="comTableBox" v-loading="loadingText === '加载模板数据中...'" :element-loading-text="loadingText">
-    <p style="display:none;">{{tableList}}</p>
+  <div class="comTableBox" ref="comTableBox">
+    <p style="display:none;">{{tableData}}{{tableList}}</p>
 
-    <el-table :data="tableList" size="mini" border :height="tableHeight">
-      <!-- 操作 -->
-      <el-table-column label="排序" width="140" fixed>
+    <el-table :data="item" size="mini" border :height="tableHeight" v-for="(item, index) in tableObj" :key="'table_' + index" v-if="index === tableActive && pageType !== 'showView'">
+      <!-- 行 -->
+      <el-table-column label="" width="45" fixed>
         <template slot-scope="scope">
-          <el-input size="mini" placeholder="序号" v-model="scope.row.node_number" @change="numChange">
-            <template slot="append">
-              <el-popconfirm :title="'确定要删除 ' + scope.row.node_name + ' 吗？'" icon="el-icon-info" iconColor="red" confirmButtonType="text"
-                @onConfirm="deleteClick(scope.$index)"
-              >
-                <span class="hover" slot="reference">删除</span>
-              </el-popconfirm>
-            </template>
-          </el-input>
+          {{scope.$index + 1}}
+        </template>
+      </el-table-column>
+      <!-- 操作 -->
+      <el-table-column label="操作" width="80" fixed>
+        <template slot-scope="scope">
+          <el-tag class="deleteBtn" size="mini" plain
+            v-if="!_arrIncludes(scope.row.node_code, arrCodeUsed) && pageType !== 'showView'" @click="deleteClick(scope.row.key)"
+          >
+            删除
+          </el-tag>
         </template>
       </el-table-column>
       <!-- 节点标识 -->
       <el-table-column label="节点标识" width="200" fixed>
         <template slot-scope="scope">
-          <el-checkbox-group v-if="scope.row.node_ierarchy !== 2" v-model="nodeList[scope.$index].badge" :disabled="pageType === 'showView'">
+          <el-checkbox-group v-if="tableObj[index][scope.row.index] && scope.row.node_ierarchy !== 2" v-model="tableObj[index][scope.row.index].badge" :disabled="pageType === 'showView'">
             <el-checkbox class="comCheckbox" label="is_core_node">核心节点</el-checkbox>
             <el-checkbox class="comCheckbox" label="is_audit_follow">审核关注</el-checkbox>
           </el-checkbox-group>
@@ -48,7 +50,7 @@
         <template slot-scope="scope">
           <span class="grey" v-if="scope.row.node_ierarchy === 2">{{typeObj[scope.row.submit_type]}}</span>
           <div v-else>
-            <el-select class="comSelect" v-if="nodeList[scope.$index]" v-model="nodeList[scope.$index].submit_type" size="mini" :disabled="pageType === 'showView'">
+            <el-select class="comSelect" v-if="tableObj[index][scope.row.index]" v-model="tableObj[index][scope.row.index].submit_type" size="mini" :disabled="pageType === 'showView'">
               <el-option class="comSelectOptions" label="系统计算" :value="1"></el-option>
               <el-option class="comSelectOptions" label="用户提报" :value="2"></el-option>
               <el-option class="comSelectOptions" label="系统生成" :value="3"></el-option>
@@ -61,9 +63,9 @@
         <template slot-scope="scope">
           <div v-if="typeObj[scope.row.submit_type] !== '用户提报'">
             <el-input :disabled="pageType === 'showView'" size="mini"
-              v-if="nodeList[scope.$index]" v-model="nodeList[scope.$index].sys_clac_formula"
-              :placeholder="scope.$index === 0 ? '如:Math.min(Math.max(${APPQR},${PPWLDQ})-2,(${KC}-2))' : '请输入计算公式'"
-              @change="inputChange(`第${scope.$index + 1}行_系统计算公式`, $event, scope.row.node_code, 'main')"
+              v-if="tableObj[index][scope.row.index]" v-model="tableObj[index][scope.row.index].sys_clac_formula"
+              :placeholder="scope.row.index === 0 ? '如:Math.min(Math.max(${APPQR},${PPWLDQ})-2,(${KC}-2))' : '请输入计算公式'"
+              @change="inputChange(`第${scope.row.index + 1}行_系统计算公式`, $event, scope.row.node_code, 'main')"
             ></el-input>
           </div>
           <span v-if="typeObj[scope.row.submit_type] === '用户提报'">----</span>
@@ -74,9 +76,9 @@
         <template slot-scope="scope">
           <div v-if="typeObj[scope.row.submit_type] !== '系统生成'">
             <el-input :disabled="pageType === 'showView'" size="mini"
-              v-if="nodeList[scope.$index]" v-model="nodeList[scope.$index].min_section_value"
-              :placeholder="scope.$index === 0 ? '如:${KSJZZ}+3' : '请输入计算公式'"
-              @change="inputChange(`第${scope.$index + 1}行_节点验证区间最小值`, $event, scope.row.node_code)"
+              v-if="tableObj[index][scope.row.index]" v-model="tableObj[index][scope.row.index].min_section_value"
+              :placeholder="scope.row.index === 0 ? '如:${KSJZZ}+3' : '请输入计算公式'"
+              @change="inputChange(`第${scope.row.index + 1}行_节点验证区间最小值`, $event, scope.row.node_code)"
             ></el-input>
           </div>
           <span v-if="typeObj[scope.row.submit_type] === '系统生成'">----</span>
@@ -87,9 +89,9 @@
         <template slot-scope="scope">
           <div v-if="typeObj[scope.row.submit_type] !== '系统生成'">
             <el-input :disabled="pageType === 'showView'" size="mini"
-              v-if="nodeList[scope.$index]" v-model="nodeList[scope.$index].max_section_value"
-              :placeholder="scope.$index === 0 ? '如:${KSJZZ}+3' : '请输入计算公式'"
-              @change="inputChange(`第${scope.$index + 1}行_节点验证区间最大值`, $event, scope.row.node_code)"
+              v-if="tableObj[index][scope.row.index]" v-model="tableObj[index][scope.row.index].max_section_value"
+              :placeholder="scope.row.index === 0 ? '如:${KSJZZ}+3' : '请输入计算公式'"
+              @change="inputChange(`第${scope.row.index + 1}行_节点验证区间最大值`, $event, scope.row.node_code)"
             ></el-input>
           </div>
           <span v-if="typeObj[scope.row.submit_type] === '系统生成'">----</span>
@@ -101,16 +103,85 @@
           <span v-if="typeObj[scope.row.submit_type] === '系统生成'">----</span>
           <div v-else>
             <el-input size="mini" placeholder="请输入验证说明" :disabled="pageType === 'showView'"
-              v-if="nodeList[scope.$index]" v-model="nodeList[scope.$index].verification_remark"
+              v-if="tableObj[index][scope.row.index]" v-model="tableObj[index][scope.row.index].verification_remark"
             ></el-input>
           </div>
         </template>
       </el-table-column>
     </el-table>
 
+    <!-- ***** 查看 ***** -->
+    <el-table :data="item" size="mini" border :height="tableHeight" v-for="(item, index) in tableObj" :key="'table_' + index" v-if="index === tableActive && pageType === 'showView'">
+      <!-- 节点标识 -->
+      <el-table-column label="节点标识" width="200">
+        <template slot-scope="scope">
+          {{tableObj[index][scope.row.index].badgeText.join('，')}}
+        </template>
+      </el-table-column>
+      <!-- 节点名称 -->
+      <el-table-column label="节点名称" width="200">
+        <template slot-scope="scope">
+          <span :style="scope.row.node_ierarchy === 2 ? 'color: #C0C4CC;' : ''">{{scope.row.node_name}}</span>
+        </template>
+      </el-table-column>
+      <!-- 节点编码 -->
+      <el-table-column prop="node_code" label="节点编码" width="110"></el-table-column>
+      <!-- 节点层级 -->
+      <el-table-column label="节点层级" width="80">
+        <template slot-scope="scope">
+          <span :class="scope.row.node_ierarchy === 2 ? 'grey' : ''">{{ierarchyObj[scope.row.node_ierarchy] || ''}}</span>
+        </template>
+      </el-table-column>
+      <!-- 提报类型 -->
+      <el-table-column label="提报类型" width="130">
+        <template slot-scope="scope">
+          <span class="grey" v-if="scope.row.node_ierarchy === 2">{{typeObj[scope.row.submit_type]}}</span>
+          <div v-else>
+            {{typeObj[tableObj[index][scope.row.index].submit_type]}}
+          </div>
+        </template>
+      </el-table-column>
+      <!-- 系统计算公式 -->
+      <el-table-column label="系统计算公式" min-width="400">
+        <template slot-scope="scope">
+          <div v-if="typeObj[scope.row.submit_type] !== '用户提报'">
+            {{tableObj[index][scope.row.index].sys_clac_formula}}
+          </div>
+          <span v-if="typeObj[scope.row.submit_type] === '用户提报'">----</span>
+        </template>
+      </el-table-column>
+      <!-- 节点验证区间最小值 -->
+      <el-table-column label="节点验证区间最小值" width="200">
+        <template slot-scope="scope">
+          <div v-if="typeObj[scope.row.submit_type] !== '系统生成'">
+            {{tableObj[index][scope.row.index].min_section_value}}
+          </div>
+          <span v-if="typeObj[scope.row.submit_type] === '系统生成'">----</span>
+        </template>
+      </el-table-column>
+      <!-- 节点验证区间最大值 -->
+      <el-table-column label="节点验证区间最大值" width="200">
+        <template slot-scope="scope">
+          <div v-if="typeObj[scope.row.submit_type] !== '系统生成'">
+            {{tableObj[index][scope.row.index].max_section_value}}
+          </div>
+          <span v-if="typeObj[scope.row.submit_type] === '系统生成'">----</span>
+        </template>
+      </el-table-column>
+      <!-- 节点验证说明 -->
+      <el-table-column label="节点验证说明" width="200">
+        <template slot-scope="scope">
+          <span v-if="typeObj[scope.row.submit_type] === '系统生成'">----</span>
+          <div v-else>
+            {{tableObj[index][scope.row.index].verification_remark}}
+          </div>
+        </template>
+      </el-table-column>
+    </el-table>
+
     <div class="bottomBox" ref="bottomBox">
-      <el-button size="mini" type="info" plain @click="clickClose">关闭</el-button>
-      <el-button size="mini" type="primary" plain @click="save" v-if="pageType !== 'showView'">保存</el-button>
+      <el-button class="bottomBtn" size="mini" type="primary" plain @click="save" v-if="pageType !== 'showView'">保存</el-button>
+      <el-button class="bottomBtn" size="mini" type="info" plain @click="clickClose">关闭</el-button>
     </div>
 
   </div>
@@ -148,15 +219,15 @@ export default {
     }
   },
   computed: {
-    ...mapState(['nodeList', 'tableObj', 'tableActive', 'pageType', 'loadingText']),
-    ...mapGetters(['tableList']),
+    ...mapState(['nodeList', 'tableObj', 'tableActive', 'pageType']),
+    ...mapGetters(['tableData', 'tableList']),
     /**
      * [数组：全部节点]
      */
     arrCode() {
-      const { tableList } = this
+      const { tableData } = this
       const obj = { 'KHXDRQ': true, 'KSTXDSJ': true, 'YHRQ': true, 'FPJCRQ': true, 'KHJQ': true, 'GCJQ': true }
-      tableList.forEach(function (item) {
+      tableData.forEach(function (item) {
         obj[item.node_code] = true
       })
       return obj
@@ -169,21 +240,6 @@ export default {
     }
   },
   methods: {
-    /**
-     * [排序变更]
-     */
-    numChange() {
-      this.$store.commit('saveData', { name: 'isSort', obj: true })
-    },
-    /**
-     * [删除]
-     * @param {[Int]} index 索引
-     */
-    deleteClick(index) {
-      const { nodeList } = this
-      nodeList[index].is_delete = 0
-      this.$store.commit('saveData', { name: 'isSort', obj: true })
-    },
     /**
      * [输入变更]
      * @param {[String]} key  位置：第几行系统计算公式
@@ -219,6 +275,16 @@ export default {
         /* 记录：验证状态 */
         this.inputStatus = Object.assign({}, inputStatus, { [key]: false })
       }
+    },
+    /**
+     * [删除]
+     * @param {[Int]} index 索引
+     */
+    deleteClick(key) {
+      const { nodeList } = this
+      const obj = nodeList[key]
+      obj.is_delete = 0
+      this.$store.commit('spliceData', { name: 'nodeList', obj, key })
     },
     /**
      * [关闭]
@@ -325,10 +391,6 @@ export default {
 }
 .bottomBtn {
   margin-right: 30px;
-}
-
-.hover {
-  cursor: pointer;
 }
 </style>
 

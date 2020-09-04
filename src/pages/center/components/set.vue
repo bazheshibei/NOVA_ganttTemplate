@@ -45,6 +45,7 @@ export default {
     add(addPage = true) {
       const { pageType } = this
       const { ywlx: node_business_type_id } = this.selectVal
+      // if (node_business_type_id) {
       if (node_business_type_id) {
         // /* 本地 */
         // const that = this
@@ -60,12 +61,11 @@ export default {
         //   obj[item.node_id] = item
         // })
         // /* 转对象：新数据 && 去重 */
-        // let i = nodeList.length
         // const arr = []
         // local.forEach(function (item) {
         //   if (!obj[item.node_id]) {
         //     const otherObj = {}
-        //     const addObj = { key: i, badge: [], submit_type: 1, sys_clac_formula: '', min_section_value: '', max_section_value: '', verification_remark: '' }
+        //     const addObj = { badge: [], submit_type: 1, sys_clac_formula: '', min_section_value: '', max_section_value: '', verification_remark: '', is_delete: 1 }
         //     if (item.node_ierarchy === 2) {
         //       otherObj.submit_type = 2 // 内控节点 => 提报类型 改为 用户提报
         //     }
@@ -77,45 +77,45 @@ export default {
         //       item.submit_type = String(item.submit_type)
         //       arr.push(Object.assign({}, addObj, item, otherObj))
         //     }
-        //     i++
         //   }
         // })
         // this.$store.commit('saveData', { name: 'addNode', obj: true })
-        // that.$store.commit('pushData', { name: 'nodeList', obj: arr })
+        // // that.$store.commit('pushData', { name: 'nodeList', obj: arr })
+        // that.$store.commit('saveData', { name: 'nodeList', obj: nodeList.concat(arr) })
+        // this.$store.commit('saveData', { name: 'isSort', obj: true })
 
         /* 服务器 */
-        const that = this
         if (!addPage) {
           /* ----- 非新增页面 ----- */
-          const { nodeList } = that
-          const local = that.$store.state.templateData.ganttTemplateDetail || [] // 模板页面数据：节点列表
+          const { nodeList } = this
+          const local = this.$store.state.templateData.ganttTemplateDetail || [] // 模板页面数据：节点列表
           /* 转对象：原数据 */
           const obj = {}
           nodeList.forEach(function (item) {
             obj[item.node_id] = item
           })
           /* 转对象：新数据 && 去重 */
-          let i = nodeList.length
           const arr = []
           local.forEach(function (item) {
             if (!obj[item.node_id]) {
               const otherObj = {}
-              const addObj = { key: i, badge: [], submit_type: 1, sys_clac_formula: '', min_section_value: '', max_section_value: '', verification_remark: '' }
+              const addObj = { badge: [], submit_type: 1, sys_clac_formula: '', min_section_value: '', max_section_value: '', verification_remark: '', is_delete: 1 }
               if (item.node_ierarchy === 2) {
                 otherObj.submit_type = 2 // 内控节点 => 提报类型 改为 用户提报
               }
+              item.submit_type = String(item.submit_type)
               arr.push(Object.assign({}, addObj, item, otherObj))
-              i++
             }
           })
-          that.$store.commit('saveData', { name: 'addNode', obj: true })
-          that.$store.commit('pushData', { name: 'nodeList', obj: arr })
+          this.$store.commit('saveData', { name: 'addNode', obj: true })
+          this.$store.commit('saveData', { name: 'nodeList', obj: nodeList.concat(arr) })
+          this.$store.commit('saveData', { name: 'isSort', obj: true })
         } else {
           /* ----- 新增页面 ----- */
           const host = window.location.origin + '/nova/'
           const { pp: custom_id, pl: dress_type_id, ssxz: business_group_id, ddlx: order_type } = this.selectVal
           const { min_lead_time, max_lead_time } = this
-          const { p_type_id } = that
+          const { p_type_id } = this
           let str = ''
           if (p_type_id) {
             const obj = { p_type_id, custom_id, dress_type_id, business_group_id, order_type, min_lead_time, max_lead_time }
@@ -129,41 +129,45 @@ export default {
             }
             str = arr.join('&')
           }
-          // eslint-disable-next-line
-          win({
-            url: host + `pages/nodeinfo/nodeInfolist.jsp?htmlchoice=true&node_business_type_id=${node_business_type_id}&${str}`,
-            param: {},
-            width: 1100,
-            height: 550,
-            title: '批量添加节点',
-            onClose: function () {
-              const { nodeList } = that
-              const local = JSON.parse(localStorage.getItem('ganttTemplateChoiceNodeData')) || []
-              /* 转对象：原数据 */
-              const obj = {}
-              nodeList.forEach(function (item) {
-                obj[item.node_id] = item
-              })
-              /* 转对象：新数据 && 去重 */
-              let i = nodeList.length
-              const arr = []
-              local.forEach(function (item) {
-                if (!obj[item.node_id]) {
-                  const otherObj = {}
-                  const addObj = { key: i, badge: [], submit_type: 1, sys_clac_formula: '', min_section_value: '', max_section_value: '', verification_remark: '' }
-                  if (item.node_ierarchy === 2) {
-                    otherObj.submit_type = 2 // 内控节点 => 提报类型 改为 用户提报
+          const that = this
+          try {
+            // eslint-disable-next-line
+            win({
+              url: host + `pages/nodeinfo/nodeInfolist.jsp?htmlchoice=true&node_business_type_id=${node_business_type_id}&${str}`,
+              param: {},
+              width: 1100,
+              height: 550,
+              title: '批量添加节点',
+              onClose: function () {
+                const { nodeList } = that
+                const local = JSON.parse(localStorage.getItem('ganttTemplateChoiceNodeData') || '[]')
+                /* 转对象：原数据 */
+                const obj = {}
+                nodeList.forEach(function (item) {
+                  obj[item.node_id] = item
+                })
+                /* 转对象：新数据 && 去重 */
+                const arr = []
+                local.forEach(function (item) {
+                  if (!obj[item.node_id]) {
+                    const otherObj = {}
+                    const addObj = { badge: [], submit_type: 1, sys_clac_formula: '', min_section_value: '', max_section_value: '', verification_remark: '', is_delete: 1 }
+                    if (item.node_ierarchy === 2) {
+                      otherObj.submit_type = 2 // 内控节点 => 提报类型 改为 用户提报
+                    }
+                    arr.push(Object.assign({}, item, addObj, otherObj))
                   }
-                  arr.push(Object.assign({}, item, addObj, otherObj))
-                  i++
-                }
-              })
-              that.$store.commit('saveData', { name: 'addNode', obj: true })
-              that.$store.commit('pushData', { name: 'nodeList', obj: arr })
-              /* 清除缓存 */
-              localStorage.removeItem('ganttTemplateChoiceNodeData')
-            }
-          })
+                })
+                that.$store.commit('saveData', { name: 'addNode', obj: true })
+                that.$store.commit('saveData', { name: 'nodeList', obj: nodeList.concat(arr) })
+                that.$store.commit('saveData', { name: 'isSort', obj: true })
+                /* 清除缓存 */
+                localStorage.removeItem('ganttTemplateChoiceNodeData')
+              }
+            })
+          } catch (err) {
+            //
+          }
         }
       } else if (!node_business_type_id && pageType === '') {
         this.$message.error('请先选择业务类型')

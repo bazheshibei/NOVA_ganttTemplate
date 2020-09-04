@@ -1,12 +1,47 @@
 
-const obj = {}
+const Tool = {}
+
+/**
+ * [排序]
+ * @param {[Array]}   nodeList 节点列表
+ * @param {[Boolean]} isSort   是否触发排序
+ */
+Tool.sort = function (nodeList, isSort) {
+  const showArr = []
+  let i = 1
+  /* ----- 初始化 ----- */
+  nodeList.forEach(function (item, index) {
+    if (item.is_delete !== 0) {
+      item.node_number = item.node_number ? parseInt(item.node_number) : i
+      showArr.push(Object.assign({}, item))
+      i++
+    }
+  })
+  if (isSort) {
+    /* ----- 调整单个位置 ----- */
+    const arr = showArr.sort(function (val1, val2) {
+      if (val1.is_delete !== 0 && val2.is_delete !== 0) {
+        if (val1.node_number < val2.node_number) {
+          return -1
+        } else if (val1.node_number > val2.node_number) {
+          return 1
+        } else {
+          return 0
+        }
+      }
+    })
+    return arr
+  } else {
+    return showArr
+  }
+}
 
 /**
  * [整理：下拉选项]
  * @param {[Array]} list  属性值
  * @param {[String]} name 属性名
  */
-obj.options = function (list, name) {
+Tool.options = function (list, name) {
   const arr = []
   list.forEach(function (item) {
     if (name === 'ywlx') {
@@ -34,96 +69,13 @@ obj.options = function (list, name) {
 }
 
 /**
- * [表格数据：首次添加节点]
- */
-obj.tableFirst = function (state) {
-  const { nodeList, tableObj } = state
-  const arr = []
-  const strArr = []
-  nodeList.forEach(function (item, index) {
-    item.index = index
-    arr.push(item)
-    strArr.push(index) // 数据索引
-  })
-  const str = strArr.join('_')
-  tableObj[str] = arr
-  state.tableObj = Object.assign({}, tableObj)
-  state.tableActive = str
-  return arr
-}
-
-/**
- * [表格数据：再次添加节点]
- */
-obj.tableSecond = function (state) {
-  const { tableActive, tableObj, nodeList } = state
-  const arr = []
-  const strArr = []
-  /* 原数据转对象 */
-  const obj = {}
-  tableObj[tableActive].forEach(function (item) {
-    obj[item.node_id] = item
-  })
-  /* 处理全部数据 */
-  let i = 0
-  nodeList.forEach(function (item) {
-    if (obj[item.node_id]) {
-      /* 旧数据 */
-      const data = obj[item.node_id]
-      data.index = i
-      arr.push(data)
-      strArr.push(data.key) // 数据索引
-      i++
-    } else {
-      /* 新数据 */
-      if (item.is_delete !== 0) {
-        item.index = i
-        arr.push(item)
-        strArr.push(item.key) // 数据索引
-        i++
-      }
-    }
-  })
-  /* 更新表格 */
-  const str = strArr.join('_')
-  tableObj[str] = arr
-  state.tableObj = Object.assign({}, tableObj)
-  state.tableActive = str
-  state.addNode = false
-  return arr
-}
-
-/**
- * [表格数据：删除某行]
- */
-obj.tableDelete = function (state) {
-  const { tableActive, tableObj, nodeList } = state
-  const arr = []
-  const strArr = []
-  let i = 0
-  tableObj[tableActive].forEach(function (item, index) {
-    if (nodeList[item.key].is_delete !== 0) {
-      item.index = i
-      arr.push(item)
-      strArr.push(item.key) // 数据索引
-      i++
-    }
-  })
-  const str = strArr.join('_')
-  tableObj[str] = arr
-  state.tableObj = Object.assign({}, tableObj)
-  state.tableActive = str
-  return arr
-}
-
-/**
  * [在数组中查找包含某字段的项]
  * @param {[Object]} text       要查找的文字
  * @param {[Object]} name       查找的属性名
  * @param {[Object]} returnName 返回的属性名
  * @param {[Object]} arr        被查找的数组
  */
-obj.findInArr = function ({ text, name, returnName, arr }) {
+Tool.findInArr = function ({ text, name, returnName, arr }) {
   const returnData = {}
   for (const x in text) {
     for (let i = 0; i < arr[x].length; i++) {
@@ -137,4 +89,4 @@ obj.findInArr = function ({ text, name, returnName, arr }) {
   return returnData
 }
 
-export default obj
+export default Tool

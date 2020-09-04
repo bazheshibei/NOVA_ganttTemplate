@@ -63,12 +63,12 @@ obj.windowOpen = function (str) {
  */
 obj.includes = function (key, str, that) {
   const codeObj = {} //                                  用到哪些节点编码
-  const strArr = str.match(/\$\{[\w-_:/]+\}/g) || [] // 提取数组：变量
+  const strArr = str.match(/\$\{[ \w-_:/]+\}/g) || [] // 提取数组：变量
   if (strArr.length) {
     /** ----- 有节点编码 ----- **/
     /* 提取数组：节点编码 */
     const codeArr = strArr.map(function (item) {
-      const code = item.slice(2, -1)
+      const code = item.slice(2, -1).trim()
       codeObj[code] = true
       return code
     })
@@ -105,16 +105,16 @@ obj.includes = function (key, str, that) {
  * @param {[Object]} that this 对象
  */
 obj.useSelf = function (key, str, code, that) {
-  const strArr = str.match(/\$\{[\w-_:/]+\}/g) || [] // 提取数组：变量
+  const strArr = str.match(/\$\{[ \w-_:/]+\}/g) || [] // 提取数组：变量
   const { inputCode } = that
   const arrObj = {}
   const obj = {}
   let status = true
   strArr.forEach(function (item) {
-    if (item.slice(2, -1) === code) {
+    if (item.slice(2, -1).trim() === code) {
       status = false
     } else {
-      obj[item.slice(2, -1)] = true
+      obj[item.slice(2, -1).trim()] = true
     }
   })
   if (status) {
@@ -137,12 +137,12 @@ obj.useSelf = function (key, str, code, that) {
  * @param {[Object]} that this 对象
  */
 obj.eachOther = function (key, str, code, that) {
-  const strArr = str.match(/\$\{[\w-_:/]+\}/g) || [] // 提取数组：变量
+  const strArr = str.match(/\$\{[ \w-_:/]+\}/g) || [] // 提取数组：变量
   const { inputCode } = that
   let status = true
   strArr.forEach(function (item) {
-    if (item.slice(2, -1) !== code) {
-      if (inputCode[item.slice(2, -1)] && inputCode[item.slice(2, -1)][code]) {
+    if (item.slice(2, -1).trim() !== code) {
+      if (inputCode[item.slice(2, -1).trim()] && inputCode[item.slice(2, -1).trim()][code]) {
         status = false
       }
     }
@@ -168,7 +168,7 @@ obj.math = function (key, str, that) {
   const strReplace = str.replace(/[0-9]+/g, function (item) {
     return parseInt(item) * 60 * 60 * 24 * 1000
     // Math.max(${DH-XMCJ},${DH-XMCJ})+432000000-345600000*172800000/259200000
-  }).replace(/\$\{[\w-_:/]+\}/g, function (item, index) {
+  }).replace(/\$\{[ \w-_:/]+\}/g, function (item, index) {
     return new Date().getTime() + index * 60 * 60 * 24 * 1000
     // Math.max(1590652727106,1591603127106)+432000000-345600000*172800000/259200000
   })
@@ -208,17 +208,10 @@ obj.submit = function (that) {
   }
 
   /** 验证：表格 **/
-  const { tableData, inputStatus, nodeList } = that
+  const { inputStatus, nodeList } = that
   const tableArr = []
   /* 提取：提交数据 */
   const { codeObj } = that // 用到的节点
-  if (tableData.length) {
-    tableData.forEach(function (item, index) {
-      nodeList[item.key] = item
-    })
-  } else {
-    problemArr.push(`请添加节点后再保存`)
-  }
   nodeList.forEach(function (item, index) {
     if (item.sys_clac_formula || item.is_delete === 0 || parseInt(item.submit_type) === 2) {
       item.is_delete = item.is_delete === 0 ? item.is_delete : 1 // 是否删除
@@ -239,9 +232,9 @@ obj.submit = function (that) {
         inputStatus[`第${index + 1}行_系统计算公式`] = true
       }
       /* 提取：字段 */
-      const { sys_clac_formula, is_audit_follow, is_core_node, max_section_value, min_section_value, node_code, node_id, node_detail, node_ierarchy, node_name, verification_remark, is_delete, node_template_detail_id } = item
+      const { node_number, sys_clac_formula, is_audit_follow, is_core_node, is_quote, max_section_value, min_section_value, node_code, node_id, node_detail, node_ierarchy, node_name, verification_remark, is_delete, node_template_detail_id } = item
       const submit_type = parseInt(item.submit_type)
-      const obj = { sys_clac_formula, is_audit_follow, is_core_node, max_section_value, min_section_value, node_code, node_id, node_detail, node_ierarchy, node_name, verification_remark, submit_type, is_delete }
+      const obj = { node_number, sys_clac_formula, is_audit_follow, is_core_node, is_quote, max_section_value, min_section_value, node_code, node_id, node_detail, node_ierarchy, node_name, verification_remark, submit_type, is_delete }
       if (that.$store.state.pageType === 'update') {
         obj.node_template_detail_id = node_template_detail_id
       }
@@ -249,7 +242,7 @@ obj.submit = function (that) {
       if (codeObj[item.node_code] === true) {
         obj.is_quote = 1
       } else {
-        obj.is_quote = 0
+        obj.is_quote = obj.is_quote || 0
       }
       tableArr.push(obj)
     } else {

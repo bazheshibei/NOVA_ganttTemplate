@@ -63,7 +63,7 @@ module.exports = {
 
     // Paths
     assetsRoot: path.resolve(__dirname, '../gantttemplate'),
-    assetsSubDirectory: 'static',
+    assetsSubDirectory: 'ganttTemplate',
     assetsPublicPath: '/nova/pages/gantttemplate/',
 
     /**

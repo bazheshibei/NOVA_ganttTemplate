@@ -2,7 +2,7 @@
 <!-- 自定义统计 -->
 
 <template>
-  <div class="pageBox" v-on:scroll="pageScroll" ref="page">
+  <div class="pageBox" v-on:scroll="pageScroll" ref="page" v-loading="loadingText === '加载业务类型中...'" :element-loading-text="loadingText">
 
     <!-- 下拉框 -->
     <com-select ref="select"></com-select>
@@ -17,6 +17,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 import ComSelect from './components/select.vue' // 下拉框
 import ComSet from './components/set.vue' //       设置结点
 import ComTable from './components/table.vue' //   表格
@@ -32,15 +33,22 @@ export default {
     /** 计算：表格高度 **/
     this._countHeight()
 
-    // /* 平台方法 */
-    // // eslint-disable-next-line
-    // dg.removeBtn('cancel')
-    // // eslint-disable-next-line
-    // dg.removeBtn('saveAndAdd')
-    // // eslint-disable-next-line
-    // dg.removeBtn('saveAndClose')
-    // // eslint-disable-next-line
-    // dg.removeBtn('saveNoClose')
+    try {
+      /* 平台方法 */
+      // eslint-disable-next-line
+      dg.removeBtn('cancel')
+      // eslint-disable-next-line
+      dg.removeBtn('saveAndAdd')
+      // eslint-disable-next-line
+      dg.removeBtn('saveAndClose')
+      // eslint-disable-next-line
+      dg.removeBtn('saveNoClose')
+    } catch (err) {
+      //
+    }
+  },
+  computed: {
+    ...mapState(['loadingText'])
   },
   watch: {
     '$store.state.isCountTableHeight'() {
