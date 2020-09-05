@@ -24,8 +24,8 @@
       <el-table-column label="节点标识" width="200" fixed>
         <template slot-scope="scope">
           <el-checkbox-group v-if="scope.row.node_ierarchy !== 2" v-model="nodeList[scope.$index].badge" :disabled="pageType === 'showView'">
-            <el-checkbox class="comCheckbox" label="is_core_node">核心节点</el-checkbox>
-            <el-checkbox class="comCheckbox" label="is_audit_follow">审核关注</el-checkbox>
+            <el-checkbox label="is_core_node">核心节点</el-checkbox>
+            <el-checkbox label="is_audit_follow">审核关注</el-checkbox>
           </el-checkbox-group>
         </template>
       </el-table-column>
@@ -49,9 +49,9 @@
           <span class="grey" v-if="scope.row.node_ierarchy === 2">{{typeObj[scope.row.submit_type]}}</span>
           <div v-else>
             <el-select class="comSelect" v-if="nodeList[scope.$index]" v-model="nodeList[scope.$index].submit_type" size="mini" :disabled="pageType === 'showView'">
-              <el-option class="comSelectOptions" label="系统计算" :value="1"></el-option>
-              <el-option class="comSelectOptions" label="用户提报" :value="2"></el-option>
-              <el-option class="comSelectOptions" label="系统生成" :value="3"></el-option>
+              <el-option label="系统计算" :value="1"></el-option>
+              <el-option label="用户提报" :value="2"></el-option>
+              <el-option label="系统生成" :value="3"></el-option>
             </el-select>
           </div>
         </template>
@@ -310,9 +310,6 @@ export default {
   margin: 5px 0;
   cursor: pointer;
 }
-.grey { /* 灰字 */
-  color: #C0C4CC;
-}
 .comSelect { /* 下拉框 */
   margin: 5px 0;
 }
@@ -325,30 +322,5 @@ export default {
 }
 .bottomBtn {
   margin-right: 30px;
-}
-
-.hover {
-  cursor: pointer;
-}
-</style>
-
-<style>
-/*** 多选框 ***/
-.comCheckbox {
-  margin-right: 20px;
-}
-.comCheckbox > .el-checkbox__label {
-  font-size: 12px !important;
-}
-.comCheckbox:last-child {
-  margin-right: 0;
-}
-
-/*** 下拉框 ***/
-.comSelectOptions { /* 单个选项 */
-  height: 25px !important;
-  font-size: 12px !important;
-  line-height: 25px !important;
-  padding: 0 10px !important;
 }
 </style>

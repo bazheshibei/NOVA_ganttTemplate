@@ -180,7 +180,7 @@ export default {
 <style scoped>
 .comBox {
   margin-top: 10px;
-  padding: 10px 0;
+  padding: 5px 0;
   background: #F2F6FC;
   display: flex;
   flex-wrap: wrap;
@@ -203,9 +203,6 @@ export default {
 .searchVal { /* 下拉框组件 */
   flex: 1;
 }
-.comSelect { /* 下拉框组件 */
-  flex: 1;
-}
 .textBox { /* 基准值文字容器 */
   width: auto;
   min-width: auto;
@@ -215,20 +212,5 @@ export default {
 .textBox > .searchName {
   width: auto;
   min-width: auto;
-}
-.blue {
-  color: #409EFF;
-}
-.red {
-  color: #F56C6C;
-}
-</style>
-
-<style>
-.comSelectOptions { /* 单个选项 */
-  height: 25px !important;
-  font-size: 12px !important;
-  line-height: 25px !important;
-  padding: 0 10px !important;
 }
 </style>

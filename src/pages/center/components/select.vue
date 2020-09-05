@@ -9,7 +9,7 @@
       <el-select class="comSelect" ref="ywlx" filterable collapse-tags placeholder="请选择" size="mini"
         v-model="selectShow.ywlx" @change="selectChange"
       >
-        <el-option class="comSelectOptions" v-for="(val, key) in ywlx.options" :key="'options_' + key" :value="val.label"></el-option>
+        <el-option v-for="(val, key) in ywlx.options" :key="'options_' + key" :value="val.label"></el-option>
       </el-select>
     </div>
     <div class="selectBox textBox" v-else>
@@ -22,8 +22,8 @@
       <el-select class="comSelect" :ref="item.index" filterable collapse-tags placeholder="请选择" size="mini"
         v-model="selectShow[item.index]" @change="selectChange($event, item.index)"
       >
-        <el-option class="comSelectOptions" value="通用"></el-option>
-        <el-option class="comSelectOptions" v-for="(val, key) in item.options" :key="'options_' + key" :value="val.label"></el-option>
+        <el-option value="通用"></el-option>
+        <el-option v-for="(val, key) in item.options" :key="'options_' + key" :value="val.label"></el-option>
       </el-select>
     </div>
     <div class="selectBox textBox" v-for="(item, index) in [pp, plList, ssxz, ddlx]" :key="'select_' + index" v-if="_arrIncludes(item.index, templsteindex) && pageType === 'showView'">
@@ -326,14 +326,5 @@ export default {
   width: auto;
   margin-right: 30px;
   justify-content: flex-start;
-}
-</style>
-
-<style>
-.comSelectOptions { /* 单个选项 */
-  height: 25px !important;
-  font-size: 12px !important;
-  line-height: 25px !important;
-  padding: 0 10px !important;
 }
 </style>
