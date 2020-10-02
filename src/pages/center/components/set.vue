@@ -10,13 +10,23 @@
       </div>
     </div>
 
-    <div class="selectBox textBox blue" v-for="(item, index) in startObj" :key="'start_' + index">
-      <div class="searchName">{{item}}：</div>
-      <span>{{index}}</span>
+    <!-- 开发 -->
+    <div v-if="ywlxName.indexOf('开发') !== -1"></div>
+    <!-- 面料 -->
+    <div v-else-if="ywlxName.indexOf('面料') !== -1" class="selectBox textBox blue">
+      <div class="searchName">面料下达日期：</div>
+      <span>MLXDRQ</span>
     </div>
-    <div class="selectBox textBox red" v-for="(item, index) in endObj" :key="'end_' + index">
-      <div class="searchName">{{item}}：</div>
-      <span>{{index}}</span>
+    <!-- 大货 || 其他 -->
+    <div v-else class="selectBox" style="justify-content: flex-start; flex: 1;">
+      <div class="selectBox textBox blue" v-for="(item, index) in startObj" :key="'start_' + index">
+        <div class="searchName">{{item}}：</div>
+        <span>{{index}}</span>
+      </div>
+      <div class="selectBox textBox red" v-for="(item, index) in endObj" :key="'end_' + index">
+        <div class="searchName">{{item}}：</div>
+        <span>{{index}}</span>
+      </div>
     </div>
 
   </div>
@@ -32,7 +42,22 @@ export default {
     }
   },
   computed: {
-    ...mapState(['nodeList', 'pageType', 'selectVal', 'p_type_id', 'min_lead_time', 'max_lead_time'])
+    ...mapState(['ywlx', 'nodeList', 'pageType', 'selectVal', 'p_type_id', 'min_lead_time', 'max_lead_time']),
+    /**
+     * [业务类型名称]
+     */
+    ywlxName() {
+      const { ywlx = {}, selectVal } = this
+      const { options = [] } = ywlx
+      const id = selectVal.ywlx
+      let name = ''
+      options.forEach(function (item) {
+        if (item.value === id) {
+          name = item.label
+        }
+      })
+      return name
+    }
   },
   methods: {
     // [{"node_id":"2c9f10b66779c50801677c1aea6b0282","node_name":"染色完成","node_code":"DH-RSWC1","node_ierarchy":null},{"node_id":"2c9f10b66e18114f016e3ad259d617cc","node_name":"计划提报","node_code":"DH-JHTB1","node_ierarchy":null},{"node_id":"2c9f10b66c3e484d016c4b52869567c8","node_name":"项目创建","node_code":"DH-XMCJ","node_ierarchy":null}]

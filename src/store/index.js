@@ -4,13 +4,13 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import Api from '@/config/api'
 import Tool from './tool.js'
+import { Loading } from 'element-ui'
 Vue.use(Vuex)
 
 const store = new Vuex.Store({
   modules: {},
 
   state: {
-    loadingText: '', //             加载动画的文字
     p_type_id: '', //               父 ID
     isCountTableHeight: false, //   是否重新计算表格高度 [请求其他下拉选项 后 触发]
     /* 页面信息 */
@@ -106,8 +106,8 @@ const store = new Vuex.Store({
     A_getBusinessType({ state, dispatch }, { that }) {
       // /** 请求：模板数据 **/
       // dispatch('A_getGanttTemplate', { that })
+      // state.pageType = 'showView'
 
-      state.loadingText = '加载业务类型中...'
       /** 请求 **/
       const name = '业务类型'
       const obj = {}
@@ -122,14 +122,9 @@ const store = new Vuex.Store({
           localStorage.removeItem('ganttTemplateAddOrUpdate')
           /** 请求：模板数据 **/
           dispatch('A_getGanttTemplate', { that, node_template_id, type })
-        } else {
-          state.loadingText = ''
         }
       }
-      const err = function () {
-        state.loadingText = ''
-      }
-      Api({ name, obj, suc, err })
+      Api({ name, obj, suc, loading: '请求数据中...' })
     },
     /**
      * [请求：其他下拉选项]
@@ -201,80 +196,74 @@ const store = new Vuex.Store({
      * @page 非新增页面
      */
     A_getGanttTemplate({ state }, { that, node_template_id, type }) {
-      const res = JSON.parse(localStorage.getItem('甘特表新增模板'))
-      //
-      state.node_template_id = node_template_id
-      state.pageType = type
-      /* 添加页面需要的属性 */
-      if (res !== null) {
-        res.ganttTemplateDetail.map(function (item, index) {
-          item.is_delete = 1
-          item.badge = []
-          item.badgeText = []
-          if (item.is_core_node === 1) {
-            item.badge.push('is_core_node')
-            item.badgeText.push('核心节点')
-          }
-          if (item.is_audit_follow === 1) {
-            item.badge.push('is_audit_follow')
-            item.badgeText.push('审核关注')
-          }
-        })
-        state.templateData = res
-      }
-      /* 赋值：业务类型 */
-      const text = { ywlx: res.node_business_type_id }
-      const name = { ywlx: 'value' }
-      const returnName = { ywlx: 'label' }
-      const arr = { ywlx: state.ywlx.options }
-      const { ywlx } = Tool.findInArr({ text, name, returnName, arr })
-      that.selectChange(ywlx) // 下拉框：变化
-      that.selectShow.ywlx = ywlx
-      /* 赋值：节点列表 */
-      state.nodeList = res.ganttTemplateDetail
+      // const res = JSON.parse(localStorage.getItem('甘特表新增模板'))
+      // //
+      // state.node_template_id = node_template_id
+      // state.pageType = type
+      // /* 添加页面需要的属性 */
+      // if (res !== null) {
+      //   res.ganttTemplateDetail.map(function (item, index) {
+      //     item.is_delete = 1
+      //     item.badge = []
+      //     item.badgeText = []
+      //     if (item.is_core_node === 1) {
+      //       item.badge.push('is_core_node')
+      //       item.badgeText.push('核心节点')
+      //     }
+      //     if (item.is_audit_follow === 1) {
+      //       item.badge.push('is_audit_follow')
+      //       item.badgeText.push('审核关注')
+      //     }
+      //   })
+      //   state.templateData = res
+      // }
+      // /* 赋值：业务类型 */
+      // const text = { ywlx: res.node_business_type_id }
+      // const name = { ywlx: 'value' }
+      // const returnName = { ywlx: 'label' }
+      // const arr = { ywlx: state.ywlx.options }
+      // const { ywlx } = Tool.findInArr({ text, name, returnName, arr })
+      // that.selectChange(ywlx) // 下拉框：变化
+      // that.selectShow.ywlx = ywlx
+      // /* 赋值：节点列表 */
+      // state.nodeList = res.ganttTemplateDetail
 
-      // state.loadingText = '加载模板数据中...'
-      // /* 请求 */
-      // const name = '模板数据'
-      // const obj = { node_template_id }
-      // const suc = function (res) {
-      //   // localStorage.setItem('甘特表新增模板', JSON.stringify(res))
-      //   state.node_template_id = node_template_id
-      //   state.pageType = type
-      //   /* 添加页面需要的属性 */
-      //   if (res !== null) {
-      //     res.ganttTemplateDetail.map(function (item, index) {
-      //       item.badge = []
-      //       item.badgeText = []
-      //       if (item.is_core_node === 1) {
-      //         item.badge.push('is_core_node')
-      //         item.badgeText.push('核心节点')
-      //       }
-      //       if (item.is_audit_follow === 1) {
-      //         item.badge.push('is_audit_follow')
-      //         item.badgeText.push('审核关注')
-      //       }
-      //       return item
-      //     })
-      //     state.templateData = res
-      //   }
-      //   /* 赋值：业务类型 */
-      //   const text = { ywlx: res.node_business_type_id }
-      //   const name = { ywlx: 'value' }
-      //   const returnName = { ywlx: 'label' }
-      //   const arr = { ywlx: state.ywlx.options }
-      //   const { ywlx } = Tool.findInArr({ text, name, returnName, arr })
-      //   that.selectChange(ywlx) // 下拉框：变化
-      //   that.selectShow.ywlx = ywlx
-      //   /* 赋值：节点列表 */
-      //   state.nodeList = res.ganttTemplateDetail
-      //   /* 关闭加载动画 */
-      //   state.loadingText = ''
-      // }
-      // const err = function () {
-      //   state.loadingText = ''
-      // }
-      // Api({ name, obj, suc, err })
+      /* 请求 */
+      const name = '模板数据'
+      const obj = { node_template_id }
+      const suc = function (res) {
+        // localStorage.setItem('甘特表新增模板', JSON.stringify(res))
+        state.node_template_id = node_template_id
+        state.pageType = type
+        /* 添加页面需要的属性 */
+        if (res !== null) {
+          res.ganttTemplateDetail.map(function (item, index) {
+            item.badge = []
+            item.badgeText = []
+            if (item.is_core_node === 1) {
+              item.badge.push('is_core_node')
+              item.badgeText.push('核心节点')
+            }
+            if (item.is_audit_follow === 1) {
+              item.badge.push('is_audit_follow')
+              item.badgeText.push('审核关注')
+            }
+            return item
+          })
+          state.templateData = res
+        }
+        /* 赋值：业务类型 */
+        const text = { ywlx: res.node_business_type_id }
+        const name = { ywlx: 'value' }
+        const returnName = { ywlx: 'label' }
+        const arr = { ywlx: state.ywlx.options }
+        const { ywlx } = Tool.findInArr({ text, name, returnName, arr })
+        that.selectChange(ywlx) // 下拉框：变化
+        that.selectShow.ywlx = ywlx
+        /* 赋值：节点列表 */
+        state.nodeList = res.ganttTemplateDetail
+      }
+      Api({ name, obj, suc, loading: '请求数据中...' })
     },
     /**
      * [请求：保存]
@@ -284,11 +273,14 @@ const store = new Vuex.Store({
       const method = 'post'
       const obj = params.obj
       const suc = function (res) {
-        // eslint-disable-next-line
-        dg.close()
+        const loading = Loading.service({ text: '保存成功', spinner: 'el-icon-circle-check' })
+        setTimeout(() => {
+          loading.close()
+          // eslint-disable-next-line
+          dg.close()
+        }, 1000)
       }
-      const loading = '保存中...'
-      Api({ name, obj, suc, method, loading })
+      Api({ name, obj, suc, method, loading: '保存中...' })
     }
   }
 })

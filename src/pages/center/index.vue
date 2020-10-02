@@ -2,7 +2,7 @@
 <!-- 自定义统计 -->
 
 <template>
-  <div class="pageBox" v-on:scroll="pageScroll" ref="page" v-loading="loadingText === '加载业务类型中...'" :element-loading-text="loadingText">
+  <div class="pageBox" v-on:scroll="pageScroll" ref="page">
 
     <!-- 下拉框 -->
     <com-select ref="select"></com-select>
@@ -17,7 +17,6 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
 import ComSelect from './components/select.vue' // 下拉框
 import ComSet from './components/set.vue' //       设置结点
 import ComTable from './components/table.vue' //   表格
@@ -46,9 +45,6 @@ export default {
     } catch (err) {
       //
     }
-  },
-  computed: {
-    ...mapState(['loadingText'])
   },
   watch: {
     '$store.state.isCountTableHeight'() {

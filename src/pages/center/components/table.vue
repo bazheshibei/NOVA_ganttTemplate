@@ -2,12 +2,12 @@
 <!-- 模块：表格 -->
 
 <template>
-  <div class="comTableBox" ref="comTableBox" v-loading="loadingText === '加载模板数据中...'" :element-loading-text="loadingText">
+  <div class="comTableBox" ref="comTableBox">
     <p style="display:none;">{{tableList}}</p>
 
     <el-table :data="tableList" size="mini" border :height="tableHeight">
       <!-- 操作 -->
-      <el-table-column label="排序" width="140" fixed>
+      <el-table-column label="排序" width="140" fixed v-if="pageType !== 'showView'">
         <template slot-scope="scope">
           <el-input size="mini" placeholder="序号" v-model="scope.row.node_number" @change="numChange">
             <template slot="append">
@@ -57,20 +57,26 @@
         </template>
       </el-table-column>
       <!-- 系统计算公式 -->
-      <el-table-column label="系统计算公式" min-width="400">
+      <el-table-column label="系统计算公式" min-width="400" v-if="pageType !== 'showView'">
         <template slot-scope="scope">
           <div v-if="typeObj[scope.row.submit_type] !== '用户提报'">
-            <el-input :disabled="pageType === 'showView'" size="mini"
+            <el-input size="mini" :placeholder="scope.$index === 0 ? '如:Math.min(Math.max(${APPQR},${PPWLDQ})-2,(${KC}-2))' : '请输入计算公式'"
               v-if="nodeList[scope.$index]" v-model="nodeList[scope.$index].sys_clac_formula"
-              :placeholder="scope.$index === 0 ? '如:Math.min(Math.max(${APPQR},${PPWLDQ})-2,(${KC}-2))' : '请输入计算公式'"
               @change="inputChange(`第${scope.$index + 1}行_系统计算公式`, $event, scope.row.node_code, 'main')"
             ></el-input>
           </div>
           <span v-if="typeObj[scope.row.submit_type] === '用户提报'">----</span>
         </template>
       </el-table-column>
+      <el-table-column label="系统计算公式" min-width="400" v-else>
+        <template slot-scope="scope">
+          <p v-if="nodeList[scope.$index]">
+             {{nodeList[scope.$index].sys_clac_formula}}
+          </p>
+        </template>
+      </el-table-column>
       <!-- 节点验证区间最小值 -->
-      <el-table-column label="节点验证区间最小值" width="200">
+      <el-table-column label="节点验证区间最小值" width="200" v-if="pageType !== 'showView'">
         <template slot-scope="scope">
           <div v-if="typeObj[scope.row.submit_type] !== '系统生成'">
             <el-input :disabled="pageType === 'showView'" size="mini"
@@ -82,8 +88,15 @@
           <span v-if="typeObj[scope.row.submit_type] === '系统生成'">----</span>
         </template>
       </el-table-column>
+      <el-table-column label="节点验证区间最小值" min-width="200" v-else>
+        <template slot-scope="scope">
+          <p v-if="nodeList[scope.$index]">
+             {{nodeList[scope.$index].min_section_value}}
+          </p>
+        </template>
+      </el-table-column>
       <!-- 节点验证区间最大值 -->
-      <el-table-column label="节点验证区间最大值" width="200">
+      <el-table-column label="节点验证区间最大值" width="200" v-if="pageType !== 'showView'">
         <template slot-scope="scope">
           <div v-if="typeObj[scope.row.submit_type] !== '系统生成'">
             <el-input :disabled="pageType === 'showView'" size="mini"
@@ -95,8 +108,15 @@
           <span v-if="typeObj[scope.row.submit_type] === '系统生成'">----</span>
         </template>
       </el-table-column>
+      <el-table-column label="节点验证区间最大值" min-width="200" v-else>
+        <template slot-scope="scope">
+          <p v-if="nodeList[scope.$index]">
+             {{nodeList[scope.$index].max_section_value}}
+          </p>
+        </template>
+      </el-table-column>
       <!-- 节点验证说明 -->
-      <el-table-column label="节点验证说明" width="200">
+      <el-table-column label="节点验证说明" width="200" v-if="pageType !== 'showView'">
         <template slot-scope="scope">
           <span v-if="typeObj[scope.row.submit_type] === '系统生成'">----</span>
           <div v-else>
@@ -104,6 +124,13 @@
               v-if="nodeList[scope.$index]" v-model="nodeList[scope.$index].verification_remark"
             ></el-input>
           </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="节点验证说明" min-width="200" v-else>
+        <template slot-scope="scope">
+          <p v-if="nodeList[scope.$index]">
+             {{nodeList[scope.$index].verification_remark}}
+          </p>
         </template>
       </el-table-column>
     </el-table>
@@ -148,7 +175,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['nodeList', 'tableObj', 'tableActive', 'pageType', 'loadingText']),
+    ...mapState(['nodeList', 'tableObj', 'tableActive', 'pageType']),
     ...mapGetters(['tableList']),
     /**
      * [数组：全部节点]
