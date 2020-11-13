@@ -56,6 +56,21 @@
           </div>
         </template>
       </el-table-column>
+      <!-- 描述 -->
+      <el-table-column label="描述" width="130" v-if="pageType !== 'showView'">
+        <template slot-scope="scope">
+          <el-input size="mini" placeholder="节点描述" maxlength="200"
+            v-if="nodeList[scope.$index]" v-model="nodeList[scope.$index].sys_describe"
+          ></el-input>
+        </template>
+      </el-table-column>
+      <el-table-column label="描述" width="130" v-else>
+        <template slot-scope="scope">
+          <p v-if="nodeList[scope.$index]">
+             {{nodeList[scope.$index].sys_describe}}
+          </p>
+        </template>
+      </el-table-column>
       <!-- 系统计算公式 -->
       <el-table-column label="系统计算公式" min-width="400" v-if="pageType !== 'showView'">
         <template slot-scope="scope">
@@ -120,7 +135,7 @@
         <template slot-scope="scope">
           <span v-if="typeObj[scope.row.submit_type] === '系统生成'">----</span>
           <div v-else>
-            <el-input size="mini" placeholder="请输入验证说明" :disabled="pageType === 'showView'"
+            <el-input size="mini" placeholder="请输入验证说明" :disabled="pageType === 'showView'" maxlength="200"
               v-if="nodeList[scope.$index]" v-model="nodeList[scope.$index].verification_remark"
             ></el-input>
           </div>
@@ -270,16 +285,15 @@ export default {
         this.$alert(str, '请完善后再提交', { dangerouslyUseHTMLString: true })
       } else {
         /* 非新增页面 */
-        const { node_template_id, pageType, templateData: { is_copy } } = this.$store.state
+        const { node_template_id, pageType, is_copy } = this.$store.state
+        obj.is_copy = is_copy // 是否复制新增：0否，1复制新增，2复制修改
         if (pageType) {
           if (pageType === 'update') {
             /* 修改 */
             obj.node_template_id = node_template_id // 模板id
-            obj.is_copy = is_copy //                   是否复制新增1是0否
           } else if (pageType === 'addCopy') {
             /* 复制新增 */
             obj.copy_node_template_id = node_template_id // 复制对应的模板id
-            obj.is_copy = 1 //                              是否复制新增 1是0否
           }
         }
         /** 请求：保存 **/

@@ -7,7 +7,7 @@ const obj = {}
  */
 obj.templateName = function (that, type = '') {
   /** 验证：模板名称 **/
-  const { selectShow, min_lead_time, max_lead_time, pp, pl, ssxz, ddlx } = that
+  const { selectShow, min_lead_time, max_lead_time, pp, pl, ssxz, ddlx, node_template_remark } = that
   const templateNameArr = [`【${selectShow.ywlx}】`]
   if (selectShow.ywlx && type) {
     /* 提取值 */
@@ -30,16 +30,26 @@ obj.templateName = function (that, type = '') {
     /* 时间区间 */
     if (min_lead_time !== '' && max_lead_time !== '') {
       if (min_lead_time === '-1') {
-        templateNameArr.push(`小于${max_lead_time}天`)
+        templateNameArr.push(`小于${Math.abs(max_lead_time)}天`)
       } else if (max_lead_time === '-1') {
-        templateNameArr.push(`大于${min_lead_time}天`)
+        templateNameArr.push(`大于${Math.abs(min_lead_time)}天`)
       } else {
-        templateNameArr.push(`${min_lead_time}至${max_lead_time}天`)
+        templateNameArr.push(`${Math.abs(min_lead_time)}至${Math.abs(max_lead_time)}天`)
       }
     }
     /* 表尾 */
     templateNameArr.push('甘特表模板')
-    that.templateName = templateNameArr.join(' ')
+    /* 备注 */
+    if (node_template_remark) {
+      templateNameArr.push(node_template_remark)
+    }
+    /* 赋值 */
+    const name = templateNameArr.join(' ')
+    if (name.length > 500) {
+      that.$message({ message: '模板名称不可以超过500字！', type: 'warning' })
+    } else {
+      that.templateName = templateNameArr.join(' ')
+    }
   }
 }
 
@@ -192,8 +202,8 @@ obj.submit = function (that) {
   const problemArr = [] // 问题数组
 
   /** 验证：模板名称 **/
-  const { selectVal, min_lead_time, max_lead_time, template_name } = that.$store.state
-  const templateObj = { node_business_type_id: '', custom_id: '', dress_type_id: '', business_group_id: '', order_type: '', min_lead_time, max_lead_time, template_name }
+  const { selectVal, min_lead_time, max_lead_time, template_name, node_template_remark, is_copy } = that.$store.state
+  const templateObj = { node_business_type_id: '', custom_id: '', dress_type_id: '', business_group_id: '', order_type: '', min_lead_time, max_lead_time, template_name, node_template_remark }
   if (template_name && selectVal['ywlx']) {
     const word = { ywlx: 'node_business_type_id', pp: 'custom_id', pl: 'dress_type_id', ssxz: 'business_group_id', ddlx: 'order_type' } // 对应的数据库字段
     for (const x in selectVal) {
@@ -205,6 +215,30 @@ obj.submit = function (that) {
   }
   if (!template_name) {
     problemArr.push('请选择填写模板名称')
+  }
+  /* 复制新增：是否有变化 */
+  if (String(is_copy) === '1') {
+    const { selectShow, old_selectShow, min_lead_time, max_lead_time, old_min_lead_time, old_max_lead_time } = that.$store.state
+    const selectShow_2 = Object.assign({}, selectShow)
+    let err = true
+    if (err && String(min_lead_time) !== String(old_min_lead_time)) { // 交货周期：最小值
+      err = false
+    }
+    if (err && String(max_lead_time) !== String(old_max_lead_time)) { // 交货周期：最大值
+      err = false
+    }
+    for (const x in old_selectShow) { // 下拉框：原始数据
+      if (err && String(selectShow_2[x]) !== String(old_selectShow[x])) {
+        err = false
+      }
+      delete selectShow_2[x]
+    }
+    if (Object.keys(selectShow_2).length) { // 下拉框：当前的选项 > 原始选项
+      err = false
+    }
+    if (err) {
+      problemArr.push('请修改 业务类型、品牌、交货周期 等信息后再提交')
+    }
   }
 
   /** 验证：表格 **/
@@ -232,9 +266,9 @@ obj.submit = function (that) {
         inputStatus[`第${index + 1}行_系统计算公式`] = true
       }
       /* 提取：字段 */
-      const { node_number, sys_clac_formula, is_audit_follow, is_core_node, is_quote, max_section_value, min_section_value, node_code, node_id, node_detail, node_ierarchy, node_name, verification_remark, is_delete, node_template_detail_id } = item
+      const { sys_describe, node_number, sys_clac_formula, is_audit_follow, is_core_node, is_quote, max_section_value, min_section_value, node_code, node_id, node_detail, node_ierarchy, node_name, verification_remark, is_delete, node_template_detail_id } = item
       const submit_type = parseInt(item.submit_type)
-      const obj = { node_number, sys_clac_formula, is_audit_follow, is_core_node, is_quote, max_section_value, min_section_value, node_code, node_id, node_detail, node_ierarchy, node_name, verification_remark, submit_type, is_delete }
+      const obj = { sys_describe, node_number, sys_clac_formula, is_audit_follow, is_core_node, is_quote, max_section_value, min_section_value, node_code, node_id, node_detail, node_ierarchy, node_name, verification_remark, submit_type, is_delete }
       if (that.$store.state.pageType === 'update') {
         obj.node_template_detail_id = node_template_detail_id
       }

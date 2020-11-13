@@ -7,7 +7,7 @@
     <div class="selectBox" v-if="pageType !== 'showView'">
       <div class="searchName">{{ywlx.label}}：</div>
       <el-select class="comSelect" ref="ywlx" filterable collapse-tags placeholder="请选择" size="mini"
-        v-model="selectShow.ywlx" @change="selectChange"
+        v-model="selectShow.ywlx" :disabled="is_copy === 2" @change="selectChange"
       >
         <el-option v-for="(val, key) in ywlx.options" :key="'options_' + key" :value="val.label"></el-option>
       </el-select>
@@ -20,7 +20,7 @@
     <div class="selectBox" v-for="(item, index) in [pp, plList, ssxz, ddlx]" :key="'select_' + index" v-if="_arrIncludes(item.index, templsteindex) && pageType !== 'showView'">
       <div class="searchName">{{item.label}}：</div>
       <el-select class="comSelect" :ref="item.index" filterable collapse-tags placeholder="请选择" size="mini"
-        v-model="selectShow[item.index]" @change="selectChange($event, item.index)"
+        v-model="selectShow[item.index]" :disabled="is_copy === 2" @change="selectChange($event, item.index)"
       >
         <el-option value="通用"></el-option>
         <el-option v-for="(val, key) in item.options" :key="'options_' + key" :value="val.label"></el-option>
@@ -33,20 +33,37 @@
     <!-- 交货周期 -->
     <div class="selectBox" v-if="_arrIncludes('jhzq', templsteindex) && pageType !== 'showView'">
       <div class="searchName">交货周期：</div>
-      <el-input size="mini" v-model="min_lead_time" placeholder="最小天数" @input="input('min_lead_time', $event)" @blur="blur('min_lead_time', $event)"></el-input>
+      <el-input size="mini" v-model="min_lead_time" :disabled="is_copy === 2" placeholder="最小天数" @input="input('min_lead_time', $event)" @blur="blur('min_lead_time', $event)"></el-input>
       <span>&nbsp;&nbsp;至&nbsp;&nbsp;</span>
-      <el-input size="mini" v-model="max_lead_time" placeholder="最大天数" @input="input('max_lead_time', $event)" @blur="blur('max_lead_time', $event)"></el-input>
+      <el-input size="mini" v-model="max_lead_time" :disabled="is_copy === 2" placeholder="最大天数" @input="input('max_lead_time', $event)" @blur="blur('max_lead_time', $event)"></el-input>
     </div>
     <div class="selectBox textBox" v-if="_arrIncludes('jhzq', templsteindex) && pageType === 'showView'">
       交货周期：{{min_lead_time || 0}}天<span>&nbsp;至&nbsp;</span>{{max_lead_time || 0}}天
     </div>
 
-    <div class="templateBox" v-if="pageType !== 'showView'">
-      <div class="templateName">模板名称：</div>
-      <el-input size="mini" v-model="templateName" placeholder="请选择业务类型" @change="_saveData('')"></el-input>
+    <!-- 备注 -->
+    <div class="selectBox" v-if="pageType !== 'showView'">
+      <div class="templateName">备注：</div>
+      <el-input size="mini" v-model="node_template_remark" maxlength="200" placeholder="模板备注（可选，最大200字）" @change="_saveData('remark')"></el-input>
     </div>
-    <div class="templateBox textBox" v-else>
-      模板名称：{{templateName}}
+    <div class="selectBox" v-else>
+      <div class="templateName">备注：</div>
+      <p>{{node_template_remark}}</p>
+    </div>
+
+    <!-- 复制新增 -->
+    <div class="selectBox" v-if="pageType === 'addCopy'">
+      <div class="templateName">功能：</div>
+      <p style="flex: 1;">
+        <el-radio v-model="is_copy" :label="1" @change="togglePage">复制新增</el-radio>
+        <el-radio v-model="is_copy" :label="2" @change="togglePage">复制修改</el-radio>
+      </p>
+    </div>
+
+    <!-- 模板名称 -->
+    <div class="templateBox textBox" style="width: 100%;">
+      <div class="templateName">模板名称：</div>
+      <p>{{templateName}}</p>
     </div>
 
   </div>
@@ -65,15 +82,26 @@ export default {
       selectVal: { ywlx: '', pp: '通用', pl: '通用', ssxz: '通用', ddlx: '通用' }, //  下拉框：值
       min_lead_time: '', //                                                         最小天数
       max_lead_time: '', //                                                         最大天数
+      node_template_remark: '', //                                                  备注
+      is_copy: 0, //                                                                是否复制新增
       templateName: '' //                                                           模板名称
     }
   },
   created() {
+    /* 保存本地缓存：请求业务类型后会删除，但是切换复制新增时会用到 */
+    const local = JSON.parse(localStorage.getItem('ganttTemplateAddOrUpdate') || '{}')
+    this.$store.commit('saveData', { name: 'local', obj: local })
+    /* 复制新增页面，给默认值 */
+    const { type = '' } = local
+    if (type === 'addCopy') {
+      this.is_copy = 1
+      this._saveData('is_copy')
+    }
     /** 请求：业务类型 **/
     this.$store.dispatch('A_getBusinessType', { that: this })
   },
   computed: {
-    ...mapState(['ywlx', 'pp', 'pl', 'ssxz', 'ddlx', 'templsteindex', 'pageType', 'p_type_id', 'nodeList']),
+    ...mapState(['ywlx', 'pp', 'pl', 'ssxz', 'ddlx', 'templsteindex', 'pageType', 'p_type_id', 'nodeList', 'old_selectShow']),
     /**
      * [根据品牌，匹配品类]
      */
@@ -94,6 +122,15 @@ export default {
     }
   },
   methods: {
+    /**
+     * [切换：复制新增 || 复制修改]
+     */
+    togglePage(val) {
+      /** 请求：业务类型 **/
+      this.$store.dispatch('A_getBusinessType', { that: this })
+      /* 保存数据 */
+      this._saveData('is_copy')
+    },
     /**
      * [下拉框：变化]
      * @param {[String]} val  选项文字
@@ -141,14 +178,6 @@ export default {
             } else {
               that.$refs[name].blur()
             }
-            /* 赋值 */
-            that.selectVal[name] = type_id
-            that.lastVal[name] = type_id
-            that.lastShow[name] = nowLabel
-            if (name === 'ywlx') {
-              /** 请求：其他下拉选项 **/
-              that.$store.dispatch('A_getBusinessTypeData', { type_id, that })
-            }
             /* 重置 */
             if (name === 'ywlx') {
               /* 切换：业务类型 */
@@ -162,6 +191,14 @@ export default {
               const obj = { pl: '通用', ssxz: '通用', ddlx: '通用' }
               that.selectShow = Object.assign({}, that.selectShow, obj)
               that.selectVal = Object.assign({}, that.selectVal, obj)
+            }
+            /* 赋值 */
+            that.selectVal[name] = type_id
+            that.lastVal[name] = type_id
+            that.lastShow[name] = nowLabel
+            if (name === 'ywlx') {
+              /** 请求：其他下拉选项 **/
+              that.$store.dispatch('A_getBusinessTypeData', { type_id, that })
             }
             /* 保存数据：vuex */
             if (name !== 'ywlx') {
@@ -181,14 +218,6 @@ export default {
         if (name === 'ywlx') {
           that.$store.commit('saveData', { name: 'p_type_id', obj: pId })
         }
-        /* 赋值 */
-        this.selectVal[name] = type_id
-        this.lastVal[name] = type_id
-        this.lastShow[name] = nowLabel
-        if (name === 'ywlx') {
-          /** 请求：其他下拉选项 **/
-          this.$store.dispatch('A_getBusinessTypeData', { type_id, that: this })
-        }
         /* 重置 */
         if (name === 'ywlx') {
           /* 切换：业务类型 */
@@ -202,6 +231,14 @@ export default {
           const obj = { pl: '通用', ssxz: '通用', ddlx: '通用' }
           this.selectShow = Object.assign({}, this.selectShow, obj)
           this.selectVal = Object.assign({}, this.selectVal, obj)
+        }
+        /* 赋值 */
+        this.selectVal[name] = type_id
+        this.lastVal[name] = type_id
+        this.lastShow[name] = nowLabel
+        if (name === 'ywlx') {
+          /** 请求：其他下拉选项 **/
+          this.$store.dispatch('A_getBusinessTypeData', { type_id, that: this })
         }
         /* 保存数据：vuex */
         if (name !== 'ywlx') {
@@ -251,7 +288,6 @@ export default {
      * @param {[String]} type 类型 { select: 下拉框, time: 交货周期 }
      */
     _saveData(type) {
-      // console.log(type)
       if (type === 'select') {
         const { selectVal } = this
         this.$store.commit('saveData', { name: 'selectVal', obj: selectVal })
@@ -259,7 +295,18 @@ export default {
         const { min_lead_time, max_lead_time } = this
         this.$store.commit('saveData', { name: 'min_lead_time', obj: min_lead_time })
         this.$store.commit('saveData', { name: 'max_lead_time', obj: max_lead_time })
+      } else if (type === 'remark') {
+        const { node_template_remark } = this
+        this.$store.commit('saveData', { name: 'node_template_remark', obj: node_template_remark })
+      } else if (type === 'is_copy') {
+        const { is_copy } = this
+        if (is_copy === 2) {
+          this.$store.commit('resetSelect', { that: this })
+        }
+        this.$store.commit('saveData', { name: 'is_copy', obj: is_copy })
       }
+      /* 记录当前选项 */
+      this.$store.commit('saveData', { name: 'selectShow', obj: this.selectShow })
       /* 生成模板名称 */
       Tool.templateName(this, type)
       this.$store.commit('saveData', { name: 'template_name', obj: this.templateName })
