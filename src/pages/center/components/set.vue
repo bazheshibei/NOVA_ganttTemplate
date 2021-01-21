@@ -10,20 +10,12 @@
       </div>
     </div>
 
-    <!-- 开发 -->
-    <div v-if="ywlxName.indexOf('开发') !== -1"></div>
-    <!-- 面料 -->
-    <div v-else-if="ywlxName.indexOf('面料') !== -1" class="selectBox textBox blue">
-      <div class="searchName">面料下达日期：</div>
-      <span>MLXDRQ</span>
-    </div>
-    <!-- 大货 || 其他 -->
-    <div v-else class="selectBox" style="justify-content: flex-start; flex: 1;">
-      <div class="selectBox textBox blue" v-for="(item, index) in startObj" :key="'start_' + index">
+    <div class="selectBox" style="flex-wrap: wrap; justify-content: flex-start; flex: 1;">
+      <div class="selectBox textBox blue" v-for="(item, index) in jzz_start" :key="'start_' + index">
         <div class="searchName">{{item}}：</div>
         <span>{{index}}</span>
       </div>
-      <div class="selectBox textBox red" v-for="(item, index) in endObj" :key="'end_' + index">
+      <div class="selectBox textBox red" v-for="(item, index) in jzz_end" :key="'end_' + index">
         <div class="searchName">{{item}}：</div>
         <span>{{index}}</span>
       </div>
@@ -36,32 +28,15 @@
 import { mapState } from 'vuex'
 export default {
   data() {
-    return {
-      startObj: { 'KHXDRQ': '客户下单日期', 'KSTXDSJ': '款式图下单时间', 'YHRQ': '验货日期', 'FPJCRQ': '发票寄出日期' },
-      endObj: { 'KHJQ': '客户交期', 'GCJQ': '工厂交期' }
-    }
+    return {}
   },
   computed: {
-    ...mapState(['ywlx', 'nodeList', 'pageType', 'selectVal', 'p_type_id', 'min_lead_time', 'max_lead_time']),
-    /**
-     * [业务类型名称]
-     */
-    ywlxName() {
-      const { ywlx = {}, selectVal } = this
-      const { options = [] } = ywlx
-      const id = selectVal.ywlx
-      let name = ''
-      options.forEach(function (item) {
-        if (item.value === id) {
-          name = item.label
-        }
-      })
-      return name
-    }
+    ...mapState(['ywlx', 'nodeList', 'pageType', 'selectVal', 'p_type_id', 'min_lead_time', 'max_lead_time', 'jzz_start', 'jzz_end'])
   },
   methods: {
     // [{"node_id":"2c9f10b66779c50801677c1aea6b0282","node_name":"染色完成","node_code":"DH-RSWC1","node_ierarchy":null},{"node_id":"2c9f10b66e18114f016e3ad259d617cc","node_name":"计划提报","node_code":"DH-JHTB1","node_ierarchy":null},{"node_id":"2c9f10b66c3e484d016c4b52869567c8","node_name":"项目创建","node_code":"DH-XMCJ","node_ierarchy":null}]
     // [{"node_id":"2c9f10b66779c50801677c1a1121027b","node_name":"毛条到厂","node_code":"DH-MTDC","node_ierarchy":null},{"node_id":"8a8a8062638a6cab01638aaf51ee0034","node_name":"服装合同下达","node_code":"DH-FZHTXD","node_ierarchy":null},{"node_id":"2c9f10b66779c50801677c1aea760284","node_name":"大货完成","node_code":"DH-DHWC","node_ierarchy":null}]
+    // [{"node_id":"8a8a8062729bb00601729bd008100000","node_name":"面料下单时间","node_code":"MLXDSJ","node_ierarchy":null}]
 
     /**
      * [批量添加节点]
@@ -70,12 +45,12 @@ export default {
     add(addPage = true) {
       const { pageType } = this
       const { ywlx: node_business_type_id } = this.selectVal
-      // if (node_business_type_id) {
       if (node_business_type_id) {
-        // /* 本地 */
+        /* ----- 本地 ----- */
         // const that = this
         // const { nodeList } = that
         // let local = nodeList.length ? JSON.parse(localStorage.getItem('asd')) || [] : JSON.parse(localStorage.getItem('ganttTemplateChoiceNodeData')) || []
+        // let length = nodeList.length
         // if (!addPage) {
         //   /* 非新增页面 */
         //   local = that.$store.state.templateData.ganttTemplateDetail || [] // 模板页面数据：节点列表
@@ -96,24 +71,27 @@ export default {
         //     }
         //     if (addPage) {
         //       /* 新增页面 */
-        //       arr.push(Object.assign({}, item, addObj, otherObj))
+        //       arr.push(Object.assign({}, item, addObj, otherObj, { nodeIndex: length }))
         //     } else {
         //       /* 非新增页面 */
         //       item.submit_type = String(item.submit_type)
-        //       arr.push(Object.assign({}, addObj, item, otherObj))
+        //       arr.push(Object.assign({}, addObj, item, otherObj, { nodeIndex: length }))
         //     }
+        //     length++
         //   }
         // })
         // this.$store.commit('saveData', { name: 'addNode', obj: true })
         // // that.$store.commit('pushData', { name: 'nodeList', obj: arr })
         // that.$store.commit('saveData', { name: 'nodeList', obj: nodeList.concat(arr) })
         // this.$store.commit('saveData', { name: 'isSort', obj: true })
+        /* ----- 本地 ----- */
 
-        /* 服务器 */
+        /* ----- 服务器 ----- */
         if (!addPage) {
           /* ----- 非新增页面 ----- */
           const { nodeList } = this
           const local = this.$store.state.templateData.ganttTemplateDetail || [] // 模板页面数据：节点列表
+          let length = nodeList.length
           /* 转对象：原数据 */
           const obj = {}
           nodeList.forEach(function (item) {
@@ -129,7 +107,8 @@ export default {
                 otherObj.submit_type = 2 // 内控节点 => 提报类型 改为 用户提报
               }
               item.submit_type = String(item.submit_type)
-              arr.push(Object.assign({}, addObj, item, otherObj))
+              arr.push(Object.assign({}, addObj, item, otherObj, { nodeIndex: length }))
+              length++
             }
           })
           this.$store.commit('saveData', { name: 'addNode', obj: true })
@@ -138,12 +117,12 @@ export default {
         } else {
           /* ----- 新增页面 ----- */
           const host = window.location.origin + '/nova/'
-          const { pp: custom_id, pl: dress_type_id, ssxz: business_group_id, ddlx: order_type } = this.selectVal
+          const { pp: custom_id, pl: dress_type_id, ssxz: business_group_id, ddlx: order_type, xmlx: design_source } = this.selectVal
           const { min_lead_time, max_lead_time } = this
           const { p_type_id } = this
           let str = ''
           if (p_type_id) {
-            const obj = { p_type_id, custom_id, dress_type_id, business_group_id, order_type, min_lead_time, max_lead_time }
+            const obj = { p_type_id, custom_id, dress_type_id, business_group_id, order_type, design_source, min_lead_time, max_lead_time }
             const arr = []
             for (const x in obj) {
               if (obj[x] === '通用') {
@@ -166,6 +145,7 @@ export default {
               onClose: function () {
                 const { nodeList } = that
                 const local = JSON.parse(localStorage.getItem('ganttTemplateChoiceNodeData') || '[]')
+                let length = nodeList.length
                 /* 转对象：原数据 */
                 const obj = {}
                 nodeList.forEach(function (item) {
@@ -180,7 +160,8 @@ export default {
                     if (item.node_ierarchy === 2) {
                       otherObj.submit_type = 2 // 内控节点 => 提报类型 改为 用户提报
                     }
-                    arr.push(Object.assign({}, item, addObj, otherObj))
+                    arr.push(Object.assign({}, item, addObj, otherObj, { nodeIndex: length }))
+                    length++
                   }
                 })
                 that.$store.commit('saveData', { name: 'addNode', obj: true })
@@ -194,6 +175,7 @@ export default {
             //
           }
         }
+        /* ----- 服务器 ----- */
       } else if (!node_business_type_id && pageType === '') {
         this.$message.error('请先选择业务类型')
       }

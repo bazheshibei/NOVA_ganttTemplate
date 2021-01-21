@@ -30,6 +30,20 @@
       {{item.label}}：{{selectShow[item.index] || '通用'}}
     </div>
 
+    <!-- 项目类型 -->
+    <div class="selectBox" v-if="selectShow.ywlx === '开发甘特表' && pageType !== 'showView'">
+      <div class="searchName">{{xmlx.label}}：</div>
+      <el-select class="comSelect" :ref="xmlx.index" filterable collapse-tags placeholder="请选择" size="mini"
+        v-model="selectShow[xmlx.index]" :disabled="is_copy === 2" @change="selectChange($event, xmlx.index)"
+      >
+        <el-option value="通用"></el-option>
+        <el-option v-for="(val, key) in xmlx.options" :key="'options_' + key" :value="val.label"></el-option>
+      </el-select>
+    </div>
+    <div class="selectBox textBox" v-if="selectShow.ywlx === '开发甘特表' && pageType === 'showView'">
+      {{xmlx.label}}：{{selectShow[xmlx.index] || '通用'}}
+    </div>
+
     <!-- 交货周期 -->
     <div class="selectBox" v-if="_arrIncludes('jhzq', templsteindex) && pageType !== 'showView'">
       <div class="searchName">交货周期：</div>
@@ -76,15 +90,15 @@ export default {
   data() {
     return {
       /* 值 */
-      lastShow: { ywlx: '', pp: '通用', pl: '通用', ssxz: '通用', ddlx: '通用' }, //   之前选中的：文字
-      lastVal: { ywlx: '', pp: '通用', pl: '通用', ssxz: '通用', ddlx: '通用' }, //    之前选中的：值
-      selectShow: { ywlx: '', pp: '通用', pl: '通用', ssxz: '通用', ddlx: '通用' }, // 下拉框：文字
-      selectVal: { ywlx: '', pp: '通用', pl: '通用', ssxz: '通用', ddlx: '通用' }, //  下拉框：值
-      min_lead_time: '', //                                                         最小天数
-      max_lead_time: '', //                                                         最大天数
-      node_template_remark: '', //                                                  备注
-      is_copy: 0, //                                                                是否复制新增
-      templateName: '' //                                                           模板名称
+      lastShow: { ywlx: '', pp: '通用', pl: '通用', ssxz: '通用', ddlx: '通用', xmlx: '通用' }, //   之前选中的：文字
+      lastVal: { ywlx: '', pp: '通用', pl: '通用', ssxz: '通用', ddlx: '通用', xmlx: '通用' }, //    之前选中的：值
+      selectShow: { ywlx: '', pp: '通用', pl: '通用', ssxz: '通用', ddlx: '通用', xmlx: '通用' }, // 下拉框：文字
+      selectVal: { ywlx: '', pp: '通用', pl: '通用', ssxz: '通用', ddlx: '通用', xmlx: '通用' }, //  下拉框：值
+      min_lead_time: '', //                                                                       最小天数
+      max_lead_time: '', //                                                                       最大天数
+      node_template_remark: '', //                                                                备注
+      is_copy: 0, //                                                                              是否复制新增
+      templateName: '' //                                                                         模板名称
     }
   },
   created() {
@@ -101,7 +115,7 @@ export default {
     this.$store.dispatch('A_getBusinessType', { that: this })
   },
   computed: {
-    ...mapState(['ywlx', 'pp', 'pl', 'ssxz', 'ddlx', 'templsteindex', 'pageType', 'p_type_id', 'nodeList', 'old_selectShow']),
+    ...mapState(['ywlx', 'pp', 'pl', 'ssxz', 'ddlx', 'xmlx', 'templsteindex', 'pageType', 'p_type_id', 'nodeList', 'old_selectShow']),
     /**
      * [根据品牌，匹配品类]
      */
@@ -136,7 +150,8 @@ export default {
      * @param {[String]} val  选项文字
      * @param {[String]} name 选项ID
      */
-    selectChange(val, name = 'ywlx') {
+    selectChange(val, name = 'ywlx', toSave = true) {
+      this.$store.commit('saveData', { name: 'isCountTableHeight', obj: false })
       const that = this
       /* 提取 ID */
       const { options } = this[name]
@@ -152,7 +167,6 @@ export default {
           break
         }
       }
-
       /* 验证：是否需要重置节点列表 */
       const { nodeList } = this
       const typeId = this.selectVal[name] //                                         之前：选项 ID
@@ -181,14 +195,14 @@ export default {
             /* 重置 */
             if (name === 'ywlx') {
               /* 切换：业务类型 */
-              const obj = { pp: '通用', pl: '通用', ssxz: '通用', ddlx: '通用' }
+              const obj = { pp: '通用', pl: '通用', ssxz: '通用', ddlx: '通用', xmlx: '通用' }
               that.selectShow = Object.assign({}, that.selectShow, obj)
               that.selectVal = Object.assign({}, that.selectVal, obj)
               that.min_lead_time = ''
               that.max_lead_time = ''
             } else if (name === 'pp') {
               /* 切换：品牌 */
-              const obj = { pl: '通用', ssxz: '通用', ddlx: '通用' }
+              const obj = { pl: '通用', ssxz: '通用', ddlx: '通用', xmlx: '通用' }
               that.selectShow = Object.assign({}, that.selectShow, obj)
               that.selectVal = Object.assign({}, that.selectVal, obj)
             }
@@ -199,6 +213,10 @@ export default {
             if (name === 'ywlx') {
               /** 请求：其他下拉选项 **/
               that.$store.dispatch('A_getBusinessTypeData', { type_id, that })
+              /** 请求：基准值 **/
+              that.$store.dispatch('A_getGanttReference', { node_business_type_id: type_id })
+            } else {
+              this.$store.commit('saveData', { name: 'isCountTableHeight', obj: true })
             }
             /* 保存数据：vuex */
             if (name !== 'ywlx') {
@@ -221,14 +239,17 @@ export default {
         /* 重置 */
         if (name === 'ywlx') {
           /* 切换：业务类型 */
-          const obj = { pp: '通用', pl: '通用', ssxz: '通用', ddlx: '通用' }
+          const obj = { pp: '通用', pl: '通用', ssxz: '通用', ddlx: '通用', xmlx: '通用' }
           this.selectShow = Object.assign({}, this.selectShow, obj)
           this.selectVal = Object.assign({}, this.selectVal, obj)
           this.min_lead_time = ''
           this.max_lead_time = ''
+          setTimeout(function () {
+            that.$store.commit('saveData', { name: 'selectVal', obj: Object.assign({}, that.selectVal) })
+          }, 0)
         } else if (name === 'pp') {
           /* 切换：品牌 */
-          const obj = { pl: '通用', ssxz: '通用', ddlx: '通用' }
+          const obj = { pl: '通用', ssxz: '通用', ddlx: '通用', xmlx: '通用' }
           this.selectShow = Object.assign({}, this.selectShow, obj)
           this.selectVal = Object.assign({}, this.selectVal, obj)
         }
@@ -238,10 +259,14 @@ export default {
         this.lastShow[name] = nowLabel
         if (name === 'ywlx') {
           /** 请求：其他下拉选项 **/
-          this.$store.dispatch('A_getBusinessTypeData', { type_id, that: this })
+          that.$store.dispatch('A_getBusinessTypeData', { type_id, that: this })
+          /** 请求：基准值 **/
+          that.$store.dispatch('A_getGanttReference', { node_business_type_id: type_id })
+        } else {
+          this.$store.commit('saveData', { name: 'isCountTableHeight', obj: true })
         }
         /* 保存数据：vuex */
-        if (name !== 'ywlx') {
+        if (name !== 'ywlx' && toSave) {
           this._saveData('select')
         }
       }

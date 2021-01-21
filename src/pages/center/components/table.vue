@@ -9,10 +9,10 @@
       <!-- 操作 -->
       <el-table-column label="排序" width="140" fixed v-if="pageType !== 'showView'">
         <template slot-scope="scope">
-          <el-input size="mini" placeholder="序号" v-model="scope.row.node_number" @change="numChange">
+          <el-input class="deleteInputBox" size="mini" placeholder="序号" v-model="scope.row.node_number" @change="numChange(scope.row, $event)">
             <template slot="append">
               <el-popconfirm :title="'确定要删除 ' + scope.row.node_name + ' 吗？'" icon="el-icon-info" iconColor="red" confirmButtonType="text"
-                @onConfirm="deleteClick(scope.$index)"
+                @confirm="deleteClick(scope.$index, scope.row.nodeIndex)"
               >
                 <span class="hover" slot="reference">删除</span>
               </el-popconfirm>
@@ -23,7 +23,7 @@
       <!-- 节点标识 -->
       <el-table-column label="节点标识" width="200" fixed>
         <template slot-scope="scope">
-          <el-checkbox-group v-if="scope.row.node_ierarchy !== 2" v-model="nodeList[scope.$index].badge" :disabled="pageType === 'showView'">
+          <el-checkbox-group v-if="scope.row.node_ierarchy !== 2" v-model="nodeList[scope.row.nodeIndex].badge" :disabled="pageType === 'showView'">
             <el-checkbox label="is_core_node">核心节点</el-checkbox>
             <el-checkbox label="is_audit_follow">审核关注</el-checkbox>
           </el-checkbox-group>
@@ -48,7 +48,7 @@
         <template slot-scope="scope">
           <span class="grey" v-if="scope.row.node_ierarchy === 2">{{typeObj[scope.row.submit_type]}}</span>
           <div v-else>
-            <el-select class="comSelect" v-if="nodeList[scope.$index]" v-model="nodeList[scope.$index].submit_type" size="mini" :disabled="pageType === 'showView'">
+            <el-select class="comSelect" v-if="nodeList[scope.row.nodeIndex]" v-model="nodeList[scope.row.nodeIndex].submit_type" size="mini" :disabled="pageType === 'showView'">
               <el-option label="系统计算" :value="1"></el-option>
               <el-option label="用户提报" :value="2"></el-option>
               <el-option label="系统生成" :value="3"></el-option>
@@ -60,14 +60,14 @@
       <el-table-column label="描述" width="130" v-if="pageType !== 'showView'">
         <template slot-scope="scope">
           <el-input size="mini" placeholder="节点描述" maxlength="200"
-            v-if="nodeList[scope.$index]" v-model="nodeList[scope.$index].sys_describe"
+            v-if="nodeList[scope.row.nodeIndex]" v-model="nodeList[scope.row.nodeIndex].sys_describe"
           ></el-input>
         </template>
       </el-table-column>
       <el-table-column label="描述" width="130" v-else>
         <template slot-scope="scope">
-          <p v-if="nodeList[scope.$index]">
-             {{nodeList[scope.$index].sys_describe}}
+          <p v-if="nodeList[scope.row.nodeIndex]">
+             {{nodeList[scope.row.nodeIndex].sys_describe}}
           </p>
         </template>
       </el-table-column>
@@ -76,7 +76,7 @@
         <template slot-scope="scope">
           <div v-if="typeObj[scope.row.submit_type] !== '用户提报'">
             <el-input size="mini" :placeholder="scope.$index === 0 ? '如:Math.min(Math.max(${APPQR},${PPWLDQ})-2,(${KC}-2))' : '请输入计算公式'"
-              v-if="nodeList[scope.$index]" v-model="nodeList[scope.$index].sys_clac_formula"
+              v-if="nodeList[scope.row.nodeIndex]" v-model="nodeList[scope.row.nodeIndex].sys_clac_formula"
               @change="inputChange(`第${scope.$index + 1}行_系统计算公式`, $event, scope.row.node_code, 'main')"
             ></el-input>
           </div>
@@ -85,8 +85,8 @@
       </el-table-column>
       <el-table-column label="系统计算公式" min-width="400" v-else>
         <template slot-scope="scope">
-          <p v-if="nodeList[scope.$index]">
-             {{nodeList[scope.$index].sys_clac_formula}}
+          <p v-if="nodeList[scope.row.nodeIndex]">
+             {{nodeList[scope.row.nodeIndex].sys_clac_formula}}
           </p>
         </template>
       </el-table-column>
@@ -95,7 +95,7 @@
         <template slot-scope="scope">
           <div v-if="typeObj[scope.row.submit_type] !== '系统生成'">
             <el-input :disabled="pageType === 'showView'" size="mini"
-              v-if="nodeList[scope.$index]" v-model="nodeList[scope.$index].min_section_value"
+              v-if="nodeList[scope.row.nodeIndex]" v-model="nodeList[scope.row.nodeIndex].min_section_value"
               :placeholder="scope.$index === 0 ? '如:${KSJZZ}+3' : '请输入计算公式'"
               @change="inputChange(`第${scope.$index + 1}行_节点验证区间最小值`, $event, scope.row.node_code)"
             ></el-input>
@@ -105,8 +105,8 @@
       </el-table-column>
       <el-table-column label="节点验证区间最小值" min-width="200" v-else>
         <template slot-scope="scope">
-          <p v-if="nodeList[scope.$index]">
-             {{nodeList[scope.$index].min_section_value}}
+          <p v-if="nodeList[scope.row.nodeIndex]">
+             {{nodeList[scope.row.nodeIndex].min_section_value}}
           </p>
         </template>
       </el-table-column>
@@ -115,7 +115,7 @@
         <template slot-scope="scope">
           <div v-if="typeObj[scope.row.submit_type] !== '系统生成'">
             <el-input :disabled="pageType === 'showView'" size="mini"
-              v-if="nodeList[scope.$index]" v-model="nodeList[scope.$index].max_section_value"
+              v-if="nodeList[scope.row.nodeIndex]" v-model="nodeList[scope.row.nodeIndex].max_section_value"
               :placeholder="scope.$index === 0 ? '如:${KSJZZ}+3' : '请输入计算公式'"
               @change="inputChange(`第${scope.$index + 1}行_节点验证区间最大值`, $event, scope.row.node_code)"
             ></el-input>
@@ -125,8 +125,8 @@
       </el-table-column>
       <el-table-column label="节点验证区间最大值" min-width="200" v-else>
         <template slot-scope="scope">
-          <p v-if="nodeList[scope.$index]">
-             {{nodeList[scope.$index].max_section_value}}
+          <p v-if="nodeList[scope.row.nodeIndex]">
+             {{nodeList[scope.row.nodeIndex].max_section_value}}
           </p>
         </template>
       </el-table-column>
@@ -136,15 +136,15 @@
           <span v-if="typeObj[scope.row.submit_type] === '系统生成'">----</span>
           <div v-else>
             <el-input size="mini" placeholder="请输入验证说明" :disabled="pageType === 'showView'" maxlength="200"
-              v-if="nodeList[scope.$index]" v-model="nodeList[scope.$index].verification_remark"
+              v-if="nodeList[scope.row.nodeIndex]" v-model="nodeList[scope.row.nodeIndex].verification_remark"
             ></el-input>
           </div>
         </template>
       </el-table-column>
       <el-table-column label="节点验证说明" min-width="200" v-else>
         <template slot-scope="scope">
-          <p v-if="nodeList[scope.$index]">
-             {{nodeList[scope.$index].verification_remark}}
+          <p v-if="nodeList[scope.row.nodeIndex]">
+             {{nodeList[scope.row.nodeIndex].verification_remark}}
           </p>
         </template>
       </el-table-column>
@@ -190,14 +190,23 @@ export default {
     }
   },
   computed: {
-    ...mapState(['nodeList', 'tableObj', 'tableActive', 'pageType']),
+    ...mapState(['nodeList', 'tableObj', 'tableActive', 'pageType', 'jzz_start', 'jzz_end']),
     ...mapGetters(['tableList']),
     /**
      * [数组：全部节点]
      */
     arrCode() {
+      const obj = {}
+      /* 添加：基准值 */
+      const { jzz_start = {}, jzz_end = {} } = this
+      for (const x in jzz_start) {
+        obj[x] = true
+      }
+      for (const x in jzz_end) {
+        obj[x] = true
+      }
+      /* 添加：表格节点 */
       const { tableList } = this
-      const obj = { 'KHXDRQ': true, 'KSTXDSJ': true, 'YHRQ': true, 'FPJCRQ': true, 'KHJQ': true, 'GCJQ': true }
       tableList.forEach(function (item) {
         obj[item.node_code] = true
       })
@@ -214,17 +223,28 @@ export default {
     /**
      * [排序变更]
      */
-    numChange() {
+    numChange(row, event) {
+      const { nodeList } = this
+      const { nodeIndex } = row
+      nodeList[nodeIndex].node_number = event
       this.$store.commit('saveData', { name: 'isSort', obj: true })
     },
     /**
      * [删除]
-     * @param {[Int]} index 索引
+     * @param {[Int]} index     表格索引
+     * @param {[Int]} nodeIndex 数据索引
      */
-    deleteClick(index) {
-      const { nodeList } = this
-      nodeList[index].is_delete = 0
+    deleteClick(index, nodeIndex) {
+      const { nodeList, inputStatus } = this
+      nodeList[nodeIndex].is_delete = 0
       this.$store.commit('saveData', { name: 'isSort', obj: true })
+      /* 删除：报错记录 */
+      const str = `第${index + 1}行`
+      for (const x in inputStatus) {
+        if (x.indexOf(str) !== -1) {
+          delete inputStatus[x]
+        }
+      }
     },
     /**
      * [输入变更]
@@ -274,9 +294,9 @@ export default {
      */
     save() {
       const [obj, problemArr, datalist] = Tool.submit(this)
+      // console.log('datalist', datalist)
       obj.datalist = JSON.stringify(datalist)
       if (problemArr.length) {
-        // console.log('报错')
         const arr = []
         problemArr.forEach(function (item) {
           arr.push(`<p>${item}</p>`)
@@ -363,5 +383,15 @@ export default {
 }
 .bottomBtn {
   margin-right: 30px;
+}
+</style>
+
+<style>
+/*** 输入框：删除 ***/
+.deleteInputBox > .el-input-group__append {
+  color: #ffffff !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  background: #F56C6C !important;
 }
 </style>

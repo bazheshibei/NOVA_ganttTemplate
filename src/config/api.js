@@ -1,4 +1,3 @@
-// 接口
 
 import Axios from '@/config/axios'
 
@@ -15,7 +14,8 @@ const url = {
   '模板数据': 'ganttTemplateShowAction.ndo?action=getGanttTemplate',
   '业务类型': 'nodeBusinessTypeShowAction.ndo?action=getBusinessType',
   '其他下拉选项': 'ganttTemplateShowAction.ndo?action=getBusinessTypeData',
-  '保存': 'ganttTemplateSaveAction.ndo?action=addOrUpdatee'
+  '保存': 'ganttTemplateSaveAction.ndo?action=addOrUpdatee',
+  '基准值': 'ganttTemplateShowAction.ndo?action=getGanttReference'
 }
 
 const request = function (param) {

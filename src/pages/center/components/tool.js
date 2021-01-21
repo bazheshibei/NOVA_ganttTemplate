@@ -7,22 +7,13 @@ const obj = {}
  */
 obj.templateName = function (that, type = '') {
   /** 验证：模板名称 **/
-  const { selectShow, min_lead_time, max_lead_time, pp, pl, ssxz, ddlx, node_template_remark } = that
+  const { selectShow, min_lead_time, max_lead_time, node_template_remark } = that
   const templateNameArr = [`【${selectShow.ywlx}】`]
   if (selectShow.ywlx && type) {
     /* 提取值 */
     for (const x in selectShow) {
       if (x !== 'ywlx' && selectShow[x]) {
-        if (x === 'pp' && pp.options.length) {
-          templateNameArr.push(selectShow[x])
-        }
-        if (x === 'pl' && pl.options.length) {
-          templateNameArr.push(selectShow[x])
-        }
-        if (x === 'ssxz' && ssxz.options.length) {
-          templateNameArr.push(selectShow[x])
-        }
-        if (x === 'ddlx' && ddlx.options.length) {
+        if (that[x].options && that[x].options.length) {
           templateNameArr.push(selectShow[x])
         }
       }
@@ -203,9 +194,9 @@ obj.submit = function (that) {
 
   /** 验证：模板名称 **/
   const { selectVal, min_lead_time, max_lead_time, template_name, node_template_remark, is_copy } = that.$store.state
-  const templateObj = { node_business_type_id: '', custom_id: '', dress_type_id: '', business_group_id: '', order_type: '', min_lead_time, max_lead_time, template_name, node_template_remark }
+  const templateObj = { node_business_type_id: '', custom_id: '', dress_type_id: '', business_group_id: '', order_type: '', design_source: '', min_lead_time, max_lead_time, template_name, node_template_remark }
   if (template_name && selectVal['ywlx']) {
-    const word = { ywlx: 'node_business_type_id', pp: 'custom_id', pl: 'dress_type_id', ssxz: 'business_group_id', ddlx: 'order_type' } // 对应的数据库字段
+    const word = { ywlx: 'node_business_type_id', pp: 'custom_id', pl: 'dress_type_id', ssxz: 'business_group_id', ddlx: 'order_type', xmlx: 'design_source' } // 对应的数据库字段
     for (const x in selectVal) {
       templateObj[word[x]] = selectVal[x] === '通用' ? '' : selectVal[x]
     }
@@ -214,7 +205,7 @@ obj.submit = function (that) {
     problemArr.push('请选择业务类型')
   }
   if (!template_name) {
-    problemArr.push('请选择填写模板名称')
+    problemArr.push('请填写模板名称')
   }
   /* 复制新增：是否有变化 */
   if (String(is_copy) === '1') {
@@ -246,6 +237,7 @@ obj.submit = function (that) {
   const tableArr = []
   /* 提取：提交数据 */
   const { codeObj } = that // 用到的节点
+  // console.log('处理前 ----- ', nodeList)
   nodeList.forEach(function (item, index) {
     if (item.sys_clac_formula || item.is_delete === 0 || parseInt(item.submit_type) === 2) {
       item.is_delete = item.is_delete === 0 ? item.is_delete : 1 // 是否删除

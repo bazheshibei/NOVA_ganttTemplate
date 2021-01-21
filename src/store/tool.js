@@ -70,23 +70,42 @@ Tool.options = function (list, name) {
 
 /**
  * [在数组中查找包含某字段的项]
- * @param {[Object]} text       要查找的文字
- * @param {[Object]} name       查找的属性名
- * @param {[Object]} returnName 返回的属性名
- * @param {[Object]} arr        被查找的数组
+ * @param {[Object]} text 要查找的文字
+ * @param {[Object]} arr  被查找的数组
  */
-Tool.findInArr = function ({ text, name, returnName, arr }) {
+Tool.findInArr = function ({ text, arr }) {
   const returnData = {}
   for (const x in text) {
     for (let i = 0; i < arr[x].length; i++) {
       const item = arr[x][i]
-      if (item[name[x]] === text[x]) {
-        returnData[x] = item[returnName[x]]
+      if (item.value === text[x]) {
+        returnData[x] = item
         break
       }
     }
   }
   return returnData
 }
+
+// /**
+//  * [在数组中查找包含某字段的项]
+//  * @param {[Object]} text       要查找的文字
+//  * @param {[Object]} name       查找的属性名
+//  * @param {[Object]} returnName 返回的属性名
+//  * @param {[Object]} arr        被查找的数组
+//  */
+// Tool.findInArr = function ({ text, name, returnName, arr }) {
+//   const returnData = {}
+//   for (const x in text) {
+//     for (let i = 0; i < arr[x].length; i++) {
+//       const item = arr[x][i]
+//       if (item[name[x]] === text[x]) {
+//         returnData[x] = item[returnName[x]]
+//         break
+//       }
+//     }
+//   }
+//   return returnData
+// }
 
 export default Tool
