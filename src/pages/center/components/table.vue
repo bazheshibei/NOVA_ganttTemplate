@@ -226,8 +226,7 @@ export default {
     numChange(row, event) {
       const { nodeList } = this
       const { nodeIndex } = row
-      nodeList[nodeIndex].node_number = event
-      this.$store.commit('saveData', { name: 'isSort', obj: true })
+      nodeList.splice(nodeIndex, 1, Object.assign({}, nodeList[nodeIndex], { node_number: event }))
     },
     /**
      * [删除]
@@ -237,7 +236,6 @@ export default {
     deleteClick(index, nodeIndex) {
       const { nodeList, inputStatus } = this
       nodeList[nodeIndex].is_delete = 0
-      this.$store.commit('saveData', { name: 'isSort', obj: true })
       /* 删除：报错记录 */
       const str = `第${index + 1}行`
       for (const x in inputStatus) {

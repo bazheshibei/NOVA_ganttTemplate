@@ -55,7 +55,7 @@ Dev.A_getGanttTemplate = function (state, dispatch, node_template_id, type, that
   const text = { ywlx: res.node_business_type_id }
   const arr = { ywlx: state.ywlx.options }
   const { ywlx = {} } = Tool.findInArr({ text, arr })
-  const { label = '通用', value = '通用', p_type_id = '' } = ywlx
+  const { label = '无指定', value = '无指定', p_type_id = '' } = ywlx
   state.p_type_id = p_type_id
   state.old_selectShow.ywlx = label
   state.selectVal.ywlx = value
@@ -129,7 +129,7 @@ Dev.A_getBusinessTypeData = function (state, type_id, that) {
     const forData = { pp, pl, ssxz, ddlx, xmlx }
     for (const x in forData) {
       const item = forData[x]
-      const { label = '通用', value = '通用' } = item
+      const { label = '无指定', value = '无指定' } = item
       state.old_selectShow[x] = label
       state.selectVal[x] = value
       that.selectShow[x] = label

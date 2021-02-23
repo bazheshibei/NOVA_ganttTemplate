@@ -83,7 +83,6 @@ export default {
         // this.$store.commit('saveData', { name: 'addNode', obj: true })
         // // that.$store.commit('pushData', { name: 'nodeList', obj: arr })
         // that.$store.commit('saveData', { name: 'nodeList', obj: nodeList.concat(arr) })
-        // this.$store.commit('saveData', { name: 'isSort', obj: true })
         /* ----- 本地 ----- */
 
         /* ----- 服务器 ----- */
@@ -113,7 +112,6 @@ export default {
           })
           this.$store.commit('saveData', { name: 'addNode', obj: true })
           this.$store.commit('saveData', { name: 'nodeList', obj: nodeList.concat(arr) })
-          this.$store.commit('saveData', { name: 'isSort', obj: true })
         } else {
           /* ----- 新增页面 ----- */
           const host = window.location.origin + '/nova/'
@@ -125,7 +123,7 @@ export default {
             const obj = { p_type_id, custom_id, dress_type_id, business_group_id, order_type, design_source, min_lead_time, max_lead_time }
             const arr = []
             for (const x in obj) {
-              if (obj[x] === '通用') {
+              if (obj[x] === '无指定') {
                 arr.push(`${x}=`)
               } else {
                 arr.push(`${x}=${obj[x]}`)
@@ -166,7 +164,6 @@ export default {
                 })
                 that.$store.commit('saveData', { name: 'addNode', obj: true })
                 that.$store.commit('saveData', { name: 'nodeList', obj: nodeList.concat(arr) })
-                that.$store.commit('saveData', { name: 'isSort', obj: true })
                 /* 清除缓存 */
                 localStorage.removeItem('ganttTemplateChoiceNodeData')
               }

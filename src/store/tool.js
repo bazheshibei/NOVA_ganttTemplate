@@ -3,10 +3,9 @@ const Tool = {}
 
 /**
  * [排序]
- * @param {[Array]}   nodeList 节点列表
- * @param {[Boolean]} isSort   是否触发排序
+ * @param {[Array]} nodeList 节点列表
  */
-Tool.sort = function (nodeList, isSort) {
+Tool.sort = function (nodeList) {
   const showArr = []
   let i = 1
   /* ----- 初始化 ----- */
@@ -17,23 +16,19 @@ Tool.sort = function (nodeList, isSort) {
       i++
     }
   })
-  if (isSort) {
-    /* ----- 调整单个位置 ----- */
-    const arr = showArr.sort(function (val1, val2) {
-      if (val1.is_delete !== 0 && val2.is_delete !== 0) {
-        if (val1.node_number < val2.node_number) {
-          return -1
-        } else if (val1.node_number > val2.node_number) {
-          return 1
-        } else {
-          return 0
-        }
+  /* ----- 调整单个位置 ----- */
+  const arr = showArr.sort(function (val1, val2) {
+    if (val1.is_delete !== 0 && val2.is_delete !== 0) {
+      if (val1.node_number < val2.node_number) {
+        return -1
+      } else if (val1.node_number > val2.node_number) {
+        return 1
+      } else {
+        return 0
       }
-    })
-    return arr
-  } else {
-    return showArr
-  }
+    }
+  })
+  return arr
 }
 
 /**

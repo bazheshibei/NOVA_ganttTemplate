@@ -198,7 +198,7 @@ obj.submit = function (that) {
   if (template_name && selectVal['ywlx']) {
     const word = { ywlx: 'node_business_type_id', pp: 'custom_id', pl: 'dress_type_id', ssxz: 'business_group_id', ddlx: 'order_type', xmlx: 'design_source' } // 对应的数据库字段
     for (const x in selectVal) {
-      templateObj[word[x]] = selectVal[x] === '通用' ? '' : selectVal[x]
+      templateObj[word[x]] = selectVal[x] === '无指定' ? '' : selectVal[x]
     }
   }
   if (!selectVal['ywlx']) {

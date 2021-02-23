@@ -22,12 +22,12 @@
       <el-select class="comSelect" :ref="item.index" filterable collapse-tags placeholder="请选择" size="mini"
         v-model="selectShow[item.index]" :disabled="is_copy === 2" @change="selectChange($event, item.index)"
       >
-        <el-option value="通用"></el-option>
+        <el-option value="无指定"></el-option>
         <el-option v-for="(val, key) in item.options" :key="'options_' + key" :value="val.label"></el-option>
       </el-select>
     </div>
     <div class="selectBox textBox" v-for="(item, index) in [pp, plList, ssxz, ddlx]" :key="'select_' + index" v-if="_arrIncludes(item.index, templsteindex) && pageType === 'showView'">
-      {{item.label}}：{{selectShow[item.index] || '通用'}}
+      {{item.label}}：{{selectShow[item.index] || '无指定'}}
     </div>
 
     <!-- 项目类型 -->
@@ -36,12 +36,12 @@
       <el-select class="comSelect" :ref="xmlx.index" filterable collapse-tags placeholder="请选择" size="mini"
         v-model="selectShow[xmlx.index]" :disabled="is_copy === 2" @change="selectChange($event, xmlx.index)"
       >
-        <el-option value="通用"></el-option>
+        <el-option value="无指定"></el-option>
         <el-option v-for="(val, key) in xmlx.options" :key="'options_' + key" :value="val.label"></el-option>
       </el-select>
     </div>
     <div class="selectBox textBox" v-if="selectShow.ywlx === '开发甘特表' && pageType === 'showView'">
-      {{xmlx.label}}：{{selectShow[xmlx.index] || '通用'}}
+      {{xmlx.label}}：{{selectShow[xmlx.index] || '无指定'}}
     </div>
 
     <!-- 交货周期 -->
@@ -90,10 +90,10 @@ export default {
   data() {
     return {
       /* 值 */
-      lastShow: { ywlx: '', pp: '通用', pl: '通用', ssxz: '通用', ddlx: '通用', xmlx: '通用' }, //   之前选中的：文字
-      lastVal: { ywlx: '', pp: '通用', pl: '通用', ssxz: '通用', ddlx: '通用', xmlx: '通用' }, //    之前选中的：值
-      selectShow: { ywlx: '', pp: '通用', pl: '通用', ssxz: '通用', ddlx: '通用', xmlx: '通用' }, // 下拉框：文字
-      selectVal: { ywlx: '', pp: '通用', pl: '通用', ssxz: '通用', ddlx: '通用', xmlx: '通用' }, //  下拉框：值
+      lastShow: { ywlx: '', pp: '无指定', pl: '无指定', ssxz: '无指定', ddlx: '无指定', xmlx: '无指定' }, //   之前选中的：文字
+      lastVal: { ywlx: '', pp: '无指定', pl: '无指定', ssxz: '无指定', ddlx: '无指定', xmlx: '无指定' }, //    之前选中的：值
+      selectShow: { ywlx: '', pp: '无指定', pl: '无指定', ssxz: '无指定', ddlx: '无指定', xmlx: '无指定' }, // 下拉框：文字
+      selectVal: { ywlx: '', pp: '无指定', pl: '无指定', ssxz: '无指定', ddlx: '无指定', xmlx: '无指定' }, //  下拉框：值
       min_lead_time: '', //                                                                       最小天数
       max_lead_time: '', //                                                                       最大天数
       node_template_remark: '', //                                                                备注
@@ -121,7 +121,7 @@ export default {
      */
     plList() {
       const { pl, selectVal: { pp: id } } = this
-      if (id !== '通用') {
+      if (id !== '无指定') {
         const arr = []
         const { options } = pl
         options.forEach(function (item) {
@@ -155,8 +155,8 @@ export default {
       const that = this
       /* 提取 ID */
       const { options } = this[name]
-      let nowLabel = '通用' // 当前：文字
-      let type_id = '通用' //  当前：选项 ID
+      let nowLabel = '无指定' // 当前：文字
+      let type_id = '无指定' //  当前：选项 ID
       let pId = '' //         当前：父 ID
       for (let i = 0; i < options.length; i++) {
         const { label, value, p_type_id = '' } = options[i]
@@ -195,14 +195,14 @@ export default {
             /* 重置 */
             if (name === 'ywlx') {
               /* 切换：业务类型 */
-              const obj = { pp: '通用', pl: '通用', ssxz: '通用', ddlx: '通用', xmlx: '通用' }
+              const obj = { pp: '无指定', pl: '无指定', ssxz: '无指定', ddlx: '无指定', xmlx: '无指定' }
               that.selectShow = Object.assign({}, that.selectShow, obj)
               that.selectVal = Object.assign({}, that.selectVal, obj)
               that.min_lead_time = ''
               that.max_lead_time = ''
             } else if (name === 'pp') {
               /* 切换：品牌 */
-              const obj = { pl: '通用', ssxz: '通用', ddlx: '通用', xmlx: '通用' }
+              const obj = { pl: '无指定', ssxz: '无指定', ddlx: '无指定', xmlx: '无指定' }
               that.selectShow = Object.assign({}, that.selectShow, obj)
               that.selectVal = Object.assign({}, that.selectVal, obj)
             }
@@ -239,7 +239,7 @@ export default {
         /* 重置 */
         if (name === 'ywlx') {
           /* 切换：业务类型 */
-          const obj = { pp: '通用', pl: '通用', ssxz: '通用', ddlx: '通用', xmlx: '通用' }
+          const obj = { pp: '无指定', pl: '无指定', ssxz: '无指定', ddlx: '无指定', xmlx: '无指定' }
           this.selectShow = Object.assign({}, this.selectShow, obj)
           this.selectVal = Object.assign({}, this.selectVal, obj)
           this.min_lead_time = ''
@@ -249,7 +249,7 @@ export default {
           }, 0)
         } else if (name === 'pp') {
           /* 切换：品牌 */
-          const obj = { pl: '通用', ssxz: '通用', ddlx: '通用', xmlx: '通用' }
+          const obj = { pl: '无指定', ssxz: '无指定', ddlx: '无指定', xmlx: '无指定' }
           this.selectShow = Object.assign({}, this.selectShow, obj)
           this.selectVal = Object.assign({}, this.selectVal, obj)
         }

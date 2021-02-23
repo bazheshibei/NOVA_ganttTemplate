@@ -38,8 +38,6 @@ const store = new Vuex.Store({
     /* 表格 */
     tableObj: { asd: [] }, //    表格数组
     tableActive: 'asd', //       当前应渲染的表格
-    /* 排序 */
-    isSort: true, //             是否触发排序
     /* 页面原始数据 */
     selectShow: {}, //           当前下拉框选项
     old_selectShow: {}, //       原始数据 -- 下拉框的值
@@ -59,10 +57,9 @@ const store = new Vuex.Store({
      * [排序后的节点数组]
      */
     tableList: (state) => {
-      const { nodeList, isSort } = state
-      const list = Tool.sort(nodeList, isSort)
+      const { nodeList } = state
+      const list = Tool.sort(nodeList)
       // state.nodeList = list
-      state.isSort = false
       // console.log('排序后的节点数组 ----- ', list)
       return list
     }
